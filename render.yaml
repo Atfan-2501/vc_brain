@@ -1,0 +1,24 @@
+# Render blueprint. Render auto-detects this at the repo root.
+# Deploys the FastAPI agent service from the agent-service/ subfolder.
+services:
+  - type: web
+    name: vc-brain-agent
+    runtime: python
+    rootDir: agent-service          # deploy only this subfolder
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: USE_STUBS              # start stubbed so it works with no keys/DB
+        value: "true"
+      - key: OPENAI_MODEL
+        value: gpt-4o
+      - key: OPENAI_API_KEY         # sync:false = set manually in the dashboard (secret)
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
