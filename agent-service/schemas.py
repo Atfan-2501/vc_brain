@@ -97,7 +97,9 @@ MEMO_SCHEMA = {
             "required": ["strengths", "weaknesses", "opportunities", "risks"]},
         "problem_and_product": {"type": "string"},
         "traction_and_kpis": {"type": "string"},
-        "optional_sections": {"type": "object"},
+        # NOTE: no free-form 'optional_sections' object here — OpenAI strict mode rejects an
+        # open object (needs additionalProperties:false + every prop required). memo_build
+        # defaults optional_sections to {} on its side.
         "gaps_flagged": {"type": "array", "items": {"type": "string"}},
         "cited_claim_ids": {"type": "array", "items": {"type": "string"}},
         "recommendation": {"type": "string",
