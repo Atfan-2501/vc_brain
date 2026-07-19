@@ -85,6 +85,48 @@ def log_reasoning(opportunity_id, agent, step, prompt, response, model):
     }).execute()
 
 
+def set_pre_track_record(founder_id, value: bool):
+    supabase_client().table("founders").update(
+        {"is_pre_track_record": value}).eq("founder_id", founder_id).execute()
+
+
+def get_founder_min(founder_id) -> dict | None:
+    hit = supabase_client().table("founders").select("founder_id, name").eq(
+        "founder_id", founder_id).limit(1).execute().data
+    return hit[0] if hit else None
+
+
+def company_signal_for_founder(founder_id):
+    """The handelsregister signal.raw_content + company_id for this founder (None,None if absent)."""
+    s = supabase_client().table("signals").select("company_id, raw_content").eq(
+        "founder_id", founder_id).eq("source", "handelsregister").limit(1).execute().data
+    if not s:
+        return None, None
+    return s[0]["raw_content"], s[0]["company_id"]
+
+
+def founders_to_enrich(limit=None) -> list[dict]:
+    """Outbound founders discovered via handelsregister that have NOT been enriched yet
+    (no github signal). Returns {founder_id, name, company_id, company_signal_raw}."""
+    sb = supabase_client()
+    hr = sb.table("signals").select(
+        "founder_id, company_id, raw_content, founders(name)").eq(
+        "source", "handelsregister").execute().data
+    gh = sb.table("signals").select("founder_id").eq("source", "github").execute().data
+    enriched = {g["founder_id"] for g in gh if g.get("founder_id")}
+    out, seen = [], set()
+    for s in hr:
+        fid = s.get("founder_id")
+        if not fid or fid in enriched or fid in seen:
+            continue
+        seen.add(fid)
+        out.append({"founder_id": fid, "name": (s.get("founders") or {}).get("name", ""),
+                    "company_id": s.get("company_id"), "company_signal_raw": s.get("raw_content")})
+        if limit and len(out) >= limit:
+            break
+    return out
+
+
 def append_founder_score(founder_id, score, interval, trigger_signal_id=None):
     sb = supabase_client()
     sb.table("founders").update({

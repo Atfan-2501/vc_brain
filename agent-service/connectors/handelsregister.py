@@ -60,6 +60,15 @@ class HandelsregisterRecord:
     business_purpose: str
     registered_on: str          # ISO date
     source_url: str
+    # --- rich fields from the OpenRegister detail call (Tier-0 enrichment; already paid for) ---
+    website: str | None = None
+    github_handle: str | None = None
+    linkedin_url: str | None = None
+    twitter_handle: str | None = None
+    revenue_eur: float | None = None      # latest reported, converted from cents
+    employees: int | None = None
+    net_income_eur: float | None = None
+    industry_codes: list[str] | None = None
 
     @property
     def register_id(self) -> str:
@@ -236,6 +245,14 @@ def _or_map_company(c: dict, stub: dict) -> HandelsregisterRecord:
             if name:
                 directors.append(name)
     name = (c.get("name") or {}).get("name") if isinstance(c.get("name"), dict) else stub.get("name", "")
+    # contact: website + social handles (feed Tier-1 GitHub + founder footprint)
+    contact = c.get("contact") or {}
+    social = (contact.get("social_media") or {}) if contact else {}
+    # indicators: latest-first array of financials (values in CENTS -> convert to EUR)
+    ind = (c.get("indicators") or [{}])[0] if c.get("indicators") else {}
+    cents = lambda v: (v / 100.0) if isinstance(v, (int, float)) else None
+    codes = [x.get("code") for x in (c.get("industry_codes", {}).get("WZ2025") or [])
+             if x.get("code")]
     return HandelsregisterRecord(
         company_name=name or stub.get("name", ""),
         register_court=reg.get("register_court", stub.get("register_court", "München")),
@@ -248,7 +265,15 @@ def _or_map_company(c: dict, stub: dict) -> HandelsregisterRecord:
         managing_directors=directors,
         business_purpose=purpose,
         registered_on=c.get("incorporated_at", ""),
-        source_url=f"https://openregister.de/company/{c.get('id', '')}")
+        source_url=f"https://openregister.de/company/{c.get('id', '')}",
+        website=contact.get("website_url"),
+        github_handle=social.get("github"),
+        linkedin_url=social.get("linkedin"),
+        twitter_handle=social.get("twitter"),
+        revenue_eur=cents(ind.get("revenue")),
+        employees=ind.get("employees"),
+        net_income_eur=cents(ind.get("net_income")),
+        industry_codes=codes or None)
 
 
 # ---------------- public entry point ----------------

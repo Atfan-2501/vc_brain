@@ -105,6 +105,28 @@ def scan(body: ScanIn | None = None):
     return ScanOut(scan_id=scan_id, channels=channels)
 
 
+@app.post("/enrich/{founder_id}")
+def enrich_one_endpoint(founder_id: str):
+    """Depth layer: enrich a single discovered founder (Tier 0 register data + Tier 1 GitHub),
+    compute the cold-start Founder Score, persist. The live-demo 'enrich this founder now' action."""
+    if not config.DB_WIRED:
+        raise HTTPException(400, "DB_WIRED required for enrichment")
+    from enrichment.enrich import enrich_one
+    return enrich_one(founder_id)
+
+
+@app.post("/enrich", status_code=202)
+def enrich_batch_endpoint(background: BackgroundTasks, limit: int | None = None):
+    """Batch-enrich discovered founders not yet enriched. Runs in the background (GitHub/network
+    per founder); poll /founders/:id or /opportunities to see scores land."""
+    if not config.DB_WIRED:
+        raise HTTPException(400, "DB_WIRED required for enrichment")
+    from enrichment.enrich import enrich_all
+    background.add_task(enrich_all, limit)
+    from contracts import now_iso
+    return {"status": "enriching", "limit": limit, "generated_at": now_iso()}
+
+
 @app.get("/reasoning-log/{reasoning_log_id}", response_model=ReasoningLogOut)
 def get_reasoning_log(reasoning_log_id: str):
     """Agentic Traceability: the step-level chain-of-thought behind an opportunity's memo."""
