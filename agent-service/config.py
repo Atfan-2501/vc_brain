@@ -44,8 +44,11 @@ DEBUG_ERRORS = _flag("DEBUG_ERRORS", False)
 # Handelsregister connector backend: fixture (default, safe/demo) | bundesapi | openregister
 HANDELSREGISTER_BACKEND = os.getenv("HANDELSREGISTER_BACKEND", "fixture")
 OPENREGISTER_API_KEY = os.getenv("OPENREGISTER_API_KEY", "")
-# how many company-detail calls the openregister backend may make per scan (each = 10 credits;
-# free tier = 50/month). Keeps a live scan from burning the whole monthly budget.
+# total companies to keep from ONE search (10 credits, up to 50 lean records — cheap).
+OPENREGISTER_MAX_RESULTS = int(os.getenv("OPENREGISTER_MAX_RESULTS", "20"))
+# of those, how many get a full-detail call (directors/purpose/date) at 10 credits EACH.
+# free tier = 50 credits/mo, so 10 (search) + 4*10 = 50. Raise on a paid plan. The rest are
+# kept as lean records (name + register id) and filled in by the enrichment step.
 OPENREGISTER_MAX_DETAILS = int(os.getenv("OPENREGISTER_MAX_DETAILS", "4"))
 # optional recency filter (DD-MM-YYYY). Only return companies incorporated on/after this date,
 # to bias toward newly-founded startups. Empty = no recency filter (safest for non-empty results).

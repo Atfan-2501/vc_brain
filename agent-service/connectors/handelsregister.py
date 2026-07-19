@@ -149,7 +149,9 @@ def _or_request(method: str, path: str, key: str, body: dict | None = None) -> d
                                           "Accept": "application/json",
                                           # Cloudflare blocks the default Python-urllib UA (err 1010)
                                           "User-Agent": "vc-brain/1.0 (+https://openregister.de)"})
-    _rate_limit_guard()
+    # NOTE: no _rate_limit_guard here — that 55/h cap is the LEGAL limit for scraping the
+    # handelsregister.de portal (bundesapi backend). OpenRegister is a paid API, credit-limited,
+    # with its own 429 handling, so it must not be throttled by the portal rule.
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
             return json.loads(resp.read())
@@ -183,19 +185,41 @@ def _openregister_records(keywords: str) -> list[HandelsregisterRecord]:
     if config.OPENREGISTER_DEBUG:
         print(f"[openregister] raw search results: {len(results)}; "
               f"total={search.get('pagination', {}).get('total_results')}", file=sys.stderr)
-    stubs = [s for s in results if s.get("legal_form") == "gmbh" and s.get("active", True)]
+    stubs = [s for s in results
+             if s.get("legal_form") == "gmbh" and s.get("active", True)]
+    stubs = stubs[:config.OPENREGISTER_MAX_RESULTS]
 
     out: list[HandelsregisterRecord] = []
-    for stub in stubs[:config.OPENREGISTER_MAX_DETAILS]:
+    for i, stub in enumerate(stubs):
         cid = stub.get("company_id")
-        if not cid:
-            continue
-        try:
-            c = _or_request("GET", f"/v1/company/{cid}", key)
-        except Exception:
-            continue                                   # skip a bad record, keep the batch
-        out.append(_or_map_company(c, stub))
+        # spend a detail credit only on the first N; the rest are kept lean and enriched later
+        if cid and i < config.OPENREGISTER_MAX_DETAILS:
+            try:
+                c = _or_request("GET", f"/v1/company/{cid}", key)
+                out.append(_or_map_company(c, stub))
+                continue
+            except Exception:
+                pass                                   # fall through to lean on any detail error
+        out.append(_or_map_stub(stub))
+    if config.OPENREGISTER_DEBUG:
+        detailed = sum(1 for r in out if r.managing_directors)
+        print(f"[openregister] kept {len(out)} companies ({detailed} with full detail, "
+              f"{len(out) - detailed} lean/to-enrich)", file=sys.stderr)
     return out
+
+
+def _or_map_stub(stub: dict) -> HandelsregisterRecord:
+    """Lean record from a search hit only (no detail credit spent). Directors + purpose are
+    empty and get filled by the enrichment step."""
+    return HandelsregisterRecord(
+        company_name=stub.get("name", ""),
+        register_court=stub.get("register_court", "München"),
+        register_type=stub.get("register_type", "HRB"),
+        register_number=stub.get("register_number", ""),
+        legal_form=stub.get("legal_form", "gmbh"),
+        city="München", postal_code="", street="",
+        managing_directors=[], business_purpose="", registered_on="",
+        source_url=f"https://openregister.de/company/{stub.get('company_id', '')}")
 
 
 def _or_map_company(c: dict, stub: dict) -> HandelsregisterRecord:
@@ -242,9 +266,13 @@ def search_munich(keywords: str = "", max_age_days: int | None = None,
     else:
         raise ValueError(f"unknown HANDELSREGISTER_BACKEND: {backend}")
 
-    # keep Munich only (defensive — live search can leak nearby towns)
-    records = [r for r in records
-               if r.register_court == "München" or r.postal_code[:2] in MUNICH_PLZ_PREFIXES]
+    # keep Munich only (defensive — live search can leak nearby towns). Lenient: match the
+    # court/city text or an 80/81 postal code, so lean records (no postal code) aren't dropped.
+    def _is_munich(r):
+        return ("münchen" in (r.register_court or "").lower()
+                or "münchen" in (r.city or "").lower()
+                or (r.postal_code[:2] in MUNICH_PLZ_PREFIXES if r.postal_code else False))
+    records = [r for r in records if _is_munich(r)]
     if max_age_days is not None:
         records = [r for r in records
                    if (r.days_since_registration or 10**6) <= max_age_days]
