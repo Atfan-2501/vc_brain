@@ -266,6 +266,33 @@ def founder_score_for(founder_id) -> dict | None:
     return hit[0] if hit else None
 
 
+def get_opportunity_axes(opportunity_id) -> dict:
+    """Reconstruct the three persisted axis results (for the Memo Agent input)."""
+    r = supabase_client().table("opportunities").select("*").eq(
+        "opportunity_id", opportunity_id).limit(1).execute().data
+    r = r[0] if r else {}
+    return {
+        "founder": {"score": r.get("founder_axis_score"), "trend": r.get("founder_axis_trend"),
+                    "rationale": r.get("founder_axis_rationale"),
+                    "cited_claim_ids": r.get("founder_axis_claim_ids") or []},
+        "market": {"score": r.get("market_axis_score"), "trend": r.get("market_axis_trend"),
+                   "verdict": r.get("market_axis_verdict"), "rationale": r.get("market_axis_rationale"),
+                   "swot": r.get("market_axis_swot"), "cited_claim_ids": r.get("market_axis_claim_ids") or []},
+        "idea_vs_market": {"score": r.get("idea_axis_score"), "trend": r.get("idea_axis_trend"),
+                           "rationale": r.get("idea_axis_rationale"),
+                           "cited_claim_ids": r.get("idea_axis_claim_ids") or []},
+    }
+
+
+def opportunities_needing_memo(limit=None) -> list[str]:
+    """Opportunities that are scored (have a founder-axis score) but have no decision yet."""
+    rows = supabase_client().table("opportunities").select(
+        "opportunity_id, founder_axis_score, decision_recommendation").execute().data
+    ids = [r["opportunity_id"] for r in rows
+           if r.get("founder_axis_score") is not None and not r.get("decision_recommendation")]
+    return ids[:limit] if limit else ids
+
+
 def opportunities_unscored(limit=None) -> list[str]:
     """Opportunity ids that have no founder-axis score yet (i.e. not yet run through scoring)."""
     q = supabase_client().table("opportunities").select("opportunity_id").is_(

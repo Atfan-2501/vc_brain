@@ -105,6 +105,27 @@ def scan(body: ScanIn | None = None):
     return ScanOut(scan_id=scan_id, channels=channels)
 
 
+@app.post("/memo/{opportunity_id}")
+def memo_one_endpoint(opportunity_id: str):
+    """Generate the 5-section investment memo + decision for one scored opportunity (OpenAI).
+    Stamps decided_at (feeds the speed metric). The 'produce the memo now' demo action."""
+    if not (config.DB_WIRED and config.MEMO_LIVE):
+        raise HTTPException(400, "DB_WIRED and MEMO_LIVE required for memo generation")
+    from memo_build import build_memo
+    return build_memo(opportunity_id)
+
+
+@app.post("/memo", status_code=202)
+def memo_batch_endpoint(background: BackgroundTasks, limit: int | None = None):
+    """Batch: write memos + decisions for every scored opportunity that has no decision yet."""
+    if not (config.DB_WIRED and config.MEMO_LIVE):
+        raise HTTPException(400, "DB_WIRED and MEMO_LIVE required for memo generation")
+    from memo_build import build_all
+    from contracts import now_iso
+    background.add_task(build_all, limit)
+    return {"status": "writing_memos", "limit": limit, "generated_at": now_iso()}
+
+
 @app.post("/score/{opportunity_id}")
 def score_one_endpoint(opportunity_id: str):
     """Run the 3 independent axes for one opportunity (OpenAI). The live-demo 'score this now'
