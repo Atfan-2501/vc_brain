@@ -37,7 +37,10 @@ DEBUG_ERRORS = _flag("DEBUG_ERRORS", False)
 
 # Handelsregister connector backend: fixture (default, safe/demo) | bundesapi | openregister
 HANDELSREGISTER_BACKEND = os.getenv("HANDELSREGISTER_BACKEND", "fixture")
-HANDELSREGISTER_API_KEY = os.getenv("HANDELSREGISTER_API_KEY", "")
+OPENREGISTER_API_KEY = os.getenv("OPENREGISTER_API_KEY", "")
+# how many company-detail calls the openregister backend may make per scan (each = 10 credits;
+# free tier = 50/month). Keeps a live scan from burning the whole monthly budget.
+OPENREGISTER_MAX_DETAILS = int(os.getenv("OPENREGISTER_MAX_DETAILS", "4"))
 
 # Per-agent override: flip one agent live while others stay stubbed during H1-H6.
 # e.g. STUB_AGENTS = {"extraction": False} makes only extraction call OpenAI for real.

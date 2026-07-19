@@ -24,7 +24,6 @@ import hashlib
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import quote
 
 import config
 
@@ -67,13 +66,10 @@ class HandelsregisterRecord:
         return f"{self.register_court} {self.register_type} {self.register_number}"
 
     @property
-    def verification_url(self) -> str:
-        """Per-company, verifiable deep link (North Data), so each discovered founder cites a
-        specific source a human can open — not the generic portal root. Format:
-        https://www.northdata.com/<Name>, <City>/<HRB Number>"""
-        name_city = quote(f"{self.company_name}, {self.city}", safe=",")
-        reg = quote(f"{self.register_type} {self.register_number}", safe="")
-        return f"https://www.northdata.com/{name_city}/{reg}"
+    def citation(self) -> str:
+        """Canonical, verifiable citation for a company: its register ID. Anyone can confirm it
+        by searching handelsregister.de. No fabricated deep link."""
+        return f"Handelsregister {self.register_id}"
 
     @property
     def inferred_sector(self) -> str | None:
@@ -141,29 +137,77 @@ def _bundesapi_records(keywords: str) -> list[HandelsregisterRecord]:
     return out
 
 
-def _openregister_records(keywords: str) -> list[HandelsregisterRecord]:
-    """Third-party REST API (openregister.de). Needs config.HANDELSREGISTER_API_KEY."""
+_OR_BASE = "https://api.openregister.de"
+
+
+def _or_request(method: str, path: str, key: str, body: dict | None = None) -> dict:
+    import urllib.request
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(f"{_OR_BASE}{path}", data=data, method=method,
+                                 headers={"Authorization": f"Bearer {key}",
+                                          "Content-Type": "application/json"})
     _rate_limit_guard()
-    import urllib.request, urllib.parse
-    key = os.getenv("HANDELSREGISTER_API_KEY", "")
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read())
+
+
+def _openregister_records(keywords: str) -> list[HandelsregisterRecord]:
+    """Real data via openregister.de. Needs config.OPENREGISTER_API_KEY (free tier: 50 credits/mo).
+    Flow: 1 search (10 credits) -> client-side keep GmbHs -> up to OPENREGISTER_MAX_DETAILS
+    detail calls (10 credits each) for directors + purpose + incorporation date.
+    Verified against the OpenRegister OpenAPI schema (CompanyV1)."""
+    key = config.OPENREGISTER_API_KEY
     if not key:
-        raise RuntimeError("openregister backend needs HANDELSREGISTER_API_KEY.")
-    params = urllib.parse.urlencode({"q": keywords, "city": "München", "legal_form": "GmbH"})
-    req = urllib.request.Request(f"https://api.openregister.de/v1/search?{params}",
-                                 headers={"Authorization": f"Bearer {key}"})
-    with urllib.request.urlopen(req, timeout=20) as resp:
-        payload = json.loads(resp.read())
-    out = []
-    for r in payload.get("companies", []):
-        out.append(HandelsregisterRecord(
-            company_name=r.get("name", ""), register_court=r.get("register_court", "München"),
-            register_type=r.get("register_type", "HRB"), register_number=r.get("register_number", ""),
-            legal_form=r.get("legal_form", "GmbH"), city=r.get("city", "München"),
-            postal_code=r.get("postal_code", ""), street=r.get("address", ""),
-            managing_directors=[d.get("name") for d in r.get("management", [])],
-            business_purpose=r.get("purpose", ""), registered_on=r.get("registered_on", ""),
-            source_url=r.get("source_url", "https://openregister.de")))
+        raise RuntimeError("openregister backend needs OPENREGISTER_API_KEY.")
+
+    # 1) search Munich companies. location.city is a documented filter; we keep GmbHs client-side
+    #    from the lean search results (which include legal_form) BEFORE spending detail credits.
+    search = _or_request("POST", "/v1/search/company", key,
+                         {"location": {"city": "München"},
+                          "pagination": {"page": 1, "per_page": 50}})
+    stubs = [s for s in search.get("results", [])
+             if s.get("legal_form") == "gmbh" and s.get("active", True)]
+
+    out: list[HandelsregisterRecord] = []
+    for stub in stubs[:config.OPENREGISTER_MAX_DETAILS]:
+        cid = stub.get("company_id")
+        if not cid:
+            continue
+        try:
+            c = _or_request("GET", f"/v1/company/{cid}", key)
+        except Exception:
+            continue                                   # skip a bad record, keep the batch
+        out.append(_or_map_company(c, stub))
     return out
+
+
+def _or_map_company(c: dict, stub: dict) -> HandelsregisterRecord:
+    """Map the OpenRegister CompanyV1 detail object into our record shape."""
+    reg = c.get("register") or {}
+    addr = c.get("address") or {}
+    purpose = (c.get("purpose") or {}).get("purpose", "") if c.get("purpose") else ""
+    directors = []
+    for rep in c.get("representation") or []:
+        if rep.get("role") == "DIRECTOR" and rep.get("type") == "natural_person":
+            np = rep.get("natural_person") or {}
+            name = " ".join(x for x in [np.get("first_name"), np.get("last_name")] if x) \
+                   or rep.get("name")
+            if name:
+                directors.append(name)
+    name = (c.get("name") or {}).get("name") if isinstance(c.get("name"), dict) else stub.get("name", "")
+    return HandelsregisterRecord(
+        company_name=name or stub.get("name", ""),
+        register_court=reg.get("register_court", stub.get("register_court", "München")),
+        register_type=reg.get("register_type", stub.get("register_type", "HRB")),
+        register_number=reg.get("register_number", stub.get("register_number", "")),
+        legal_form=c.get("legal_form", "gmbh"),
+        city=addr.get("city", "München"),
+        postal_code=addr.get("postal_code", ""),
+        street=addr.get("street", ""),
+        managing_directors=directors,
+        business_purpose=purpose,
+        registered_on=c.get("incorporated_at", ""),
+        source_url=f"https://openregister.de/company/{c.get('id', '')}")
 
 
 # ---------------- public entry point ----------------
@@ -198,10 +242,10 @@ def to_signal_row(r: HandelsregisterRecord) -> dict:
     dedup = hashlib.sha256(r.register_id.encode()).hexdigest()[:32]
     raw = asdict(r)
     raw["register_id"] = r.register_id          # canonical citation (court + type + number)
-    raw["official_portal"] = r.source_url       # keep the portal too
+    raw["citation"] = r.citation
     return {
         "source": "handelsregister",
-        "source_url": r.verification_url,        # per-company verifiable deep link
+        "source_url": r.source_url,              # official portal (search-based, no deep links)
         "raw_content": json.dumps(raw, ensure_ascii=False),
         "tags": ["outbound", "handelsregister", "munich",
                  *( [r.inferred_sector] if r.inferred_sector else [] )],
