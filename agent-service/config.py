@@ -60,6 +60,8 @@ OPENREGISTER_MAX_DETAILS = int(os.getenv("OPENREGISTER_MAX_DETAILS", "4"))
 # to bias toward newly-founded startups. Empty = no recency filter (safest for non-empty results).
 OPENREGISTER_MIN_INCORPORATED = os.getenv("OPENREGISTER_MIN_INCORPORATED", "")
 OPENREGISTER_DEBUG = _flag("OPENREGISTER_DEBUG", False)
+# drop shelf companies (Vorratsgesellschaften) from scan results — they're not real startups
+HANDELSREGISTER_EXCLUDE_SHELF = _flag("HANDELSREGISTER_EXCLUDE_SHELF", True)
 
 # Per-agent override: flip one agent live while others stay stubbed during H1-H6.
 # e.g. STUB_AGENTS = {"extraction": False} makes only extraction call OpenAI for real.

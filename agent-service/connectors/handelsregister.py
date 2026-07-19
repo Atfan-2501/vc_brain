@@ -46,6 +46,23 @@ _SECTOR_KEYWORDS = {
 }
 
 
+import re
+
+# Shelf companies (Vorratsgesellschaften) — pre-registered shells sold to buyers, not real
+# startups. They dominate raw register searches and share founders, so they look like duplicates.
+# Filter them by the shell-provider brands + generic markers.
+_SHELF_PATTERNS = [
+    r"\bblitz\s*\d", r"scur[- ]?alpha", r"weilchensee", r"\bvorrat", r"\bvorrats",
+    r"\bv\s*v\s+gmbh\b", r"\bV\s*V\b", r"mandantennummer", r"blitzstart",
+    r"\bfoundation\s+\d", r"\bshelf\b",
+]
+
+
+def is_shell_company(name: str) -> bool:
+    n = (name or "").lower()
+    return any(re.search(p, n) for p in _SHELF_PATTERNS)
+
+
 def infer_sector(business_purpose: str | None) -> str | None:
     """Map a German business purpose to a thesis sector via keywords. Reused by the record
     property and by Tier-2 enrichment (market search topic)."""
@@ -304,6 +321,9 @@ def search_munich(keywords: str = "", max_age_days: int | None = None,
                 or "münchen" in (r.city or "").lower()
                 or (r.postal_code[:2] in MUNICH_PLZ_PREFIXES if r.postal_code else False))
     records = [r for r in records if _is_munich(r)]
+    # drop shelf companies (Vorratsgesellschaften) — junk that clutters the board and dedups
+    if getattr(config, "HANDELSREGISTER_EXCLUDE_SHELF", True):
+        records = [r for r in records if not is_shell_company(r.company_name)]
     if max_age_days is not None:
         records = [r for r in records
                    if (r.days_since_registration or 10**6) <= max_age_days]
