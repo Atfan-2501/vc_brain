@@ -241,19 +241,25 @@ def get_founder_profile(founder_id) -> dict | None:
 
 
 # ---------- embeddings (semantic ranking for Ask the Brain) ----------
-def companies_needing_embedding(limit=None) -> list[str]:
-    rows = supabase_client().table("companies").select("company_id").is_(
-        "embedding", "null").execute().data
-    ids = [r["company_id"] for r in rows]
+def companies_needing_embedding(limit=None, force=False) -> list[str]:
+    """Company ids to embed. force=True re-embeds ALL (use after enrichment adds founder claims);
+    otherwise only companies without an embedding yet."""
+    q = supabase_client().table("companies").select("company_id")
+    if not force:
+        q = q.is_("embedding", "null")
+    ids = [r["company_id"] for r in q.execute().data]
     return ids[:limit] if limit else ids
 
 
 def build_company_doc(company_id) -> str:
-    """The text we embed for a company: name + sector + geography + business purpose."""
+    """The text we embed for a company: name + sector + geography + business purpose + the FOUNDER
+    (name) and the enrichment claims about them (GitHub footprint, team background, traction).
+    This is what makes 'technical founder with strong GitHub' style queries rank well."""
     sb = supabase_client()
-    c = sb.table("companies").select("name, sector, geography").eq(
+    c = sb.table("companies").select("name, sector, geography, founder_id").eq(
         "company_id", company_id).limit(1).execute().data
     c = c[0] if c else {}
+
     purpose = ""
     sig = sb.table("signals").select("raw_content").eq(
         "company_id", company_id).eq("source", "handelsregister").limit(1).execute().data
@@ -263,7 +269,23 @@ def build_company_doc(company_id) -> str:
             purpose = (json.loads(sig[0]["raw_content"]) or {}).get("business_purpose", "")
         except Exception:
             pass
+
+    founder_name = ""
+    if c.get("founder_id"):
+        f = sb.table("founders").select("name").eq(
+            "founder_id", c["founder_id"]).limit(1).execute().data
+        founder_name = f[0]["name"] if f else ""
+
+    # enrichment claims (GitHub footprint, team background, traction, tech) carry founder signal
+    claims = sb.table("claims").select("claim_text, claim_type").eq(
+        "company_id", company_id).execute().data
+    claim_texts = [cl["claim_text"] for cl in claims
+                   if cl.get("claim_type") in ("team", "tech", "traction", "market")][:10]
+
     parts = [c.get("name", ""), c.get("sector") or "", c.get("geography") or "", purpose]
+    if founder_name:
+        parts.append(f"Founder: {founder_name}")
+    parts.extend(claim_texts)
     return " | ".join(p for p in parts if p)
 
 

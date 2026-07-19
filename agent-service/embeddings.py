@@ -26,10 +26,11 @@ def cosine(a: list[float], b: list[float]) -> float:
     return dot / (na * nb) if na and nb else 0.0
 
 
-def embed_all(limit: int | None = None) -> dict:
-    """Backfill embeddings for companies that don't have one yet."""
+def embed_all(limit: int | None = None, force: bool = False) -> dict:
+    """Backfill embeddings. force=True re-embeds every company (run after enrichment so founder
+    claims are included); otherwise only companies without an embedding."""
     import db
-    ids = db.companies_needing_embedding(limit)
+    ids = db.companies_needing_embedding(limit, force=force)
     done = 0
     for cid in ids:
         doc = db.build_company_doc(cid)

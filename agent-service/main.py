@@ -106,15 +106,16 @@ def scan(body: ScanIn | None = None):
 
 
 @app.post("/embed", status_code=202)
-def embed_backfill(background: BackgroundTasks, limit: int | None = None):
-    """Backfill semantic embeddings for companies (needed for Ask-the-Brain relevance ranking).
-    Deliberate/background so it doesn't silently spend OpenAI. Run once after a scan."""
+def embed_backfill(background: BackgroundTasks, limit: int | None = None, force: bool = False):
+    """Backfill semantic embeddings for companies (Ask-the-Brain relevance ranking). The doc
+    includes the founder + enrichment claims, so run with force=true AFTER enrichment to refresh.
+    Deliberate/background so it doesn't silently spend OpenAI."""
     if not config.DB_WIRED:
         raise HTTPException(400, "DB_WIRED required")
     from embeddings import embed_all
     from contracts import now_iso
-    background.add_task(embed_all, limit)
-    return {"status": "embedding", "limit": limit, "generated_at": now_iso()}
+    background.add_task(embed_all, limit, force)
+    return {"status": "embedding", "limit": limit, "force": force, "generated_at": now_iso()}
 
 
 @app.post("/pipeline", status_code=202)
