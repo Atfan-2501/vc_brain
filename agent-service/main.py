@@ -3,8 +3,10 @@ Each endpoint validates input, delegates to pipeline/agents, returns contract-sh
 While USE_STUBS=true it returns canned data so you can prove integration before any AI logic.
 """
 import uuid
+import traceback
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 import config
 import stub_data
@@ -19,6 +21,18 @@ app = FastAPI(title="VC Brain Agent Service", version="0.1.0")
 app.add_middleware(
     CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
 )
+
+
+@app.exception_handler(Exception)
+async def debug_exception_handler(request, exc):
+    """Surface the real error in the response when DEBUG_ERRORS=true (skips HTTPExceptions)."""
+    if isinstance(exc, HTTPException):
+        return JSONResponse(status_code=exc.status_code, content={"error": exc.detail})
+    if config.DEBUG_ERRORS:
+        return JSONResponse(status_code=500, content={
+            "error": type(exc).__name__, "detail": str(exc),
+            "trace": traceback.format_exc().splitlines()[-10:]})
+    return JSONResponse(status_code=500, content={"error": "Internal Server Error"})
 
 
 @app.get("/health")

@@ -24,6 +24,7 @@ import hashlib
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import quote
 
 import config
 
@@ -64,6 +65,15 @@ class HandelsregisterRecord:
     @property
     def register_id(self) -> str:
         return f"{self.register_court} {self.register_type} {self.register_number}"
+
+    @property
+    def verification_url(self) -> str:
+        """Per-company, verifiable deep link (North Data), so each discovered founder cites a
+        specific source a human can open — not the generic portal root. Format:
+        https://www.northdata.com/<Name>, <City>/<HRB Number>"""
+        name_city = quote(f"{self.company_name}, {self.city}", safe=",")
+        reg = quote(f"{self.register_type} {self.register_number}", safe="")
+        return f"https://www.northdata.com/{name_city}/{reg}"
 
     @property
     def inferred_sector(self) -> str | None:
@@ -186,10 +196,13 @@ def search_munich(keywords: str = "", max_age_days: int | None = None,
 # ---------------- mappers to DB row shapes (consumed by sourcing.py) ----------------
 def to_signal_row(r: HandelsregisterRecord) -> dict:
     dedup = hashlib.sha256(r.register_id.encode()).hexdigest()[:32]
+    raw = asdict(r)
+    raw["register_id"] = r.register_id          # canonical citation (court + type + number)
+    raw["official_portal"] = r.source_url       # keep the portal too
     return {
         "source": "handelsregister",
-        "source_url": r.source_url,
-        "raw_content": json.dumps(asdict(r), ensure_ascii=False),
+        "source_url": r.verification_url,        # per-company verifiable deep link
+        "raw_content": json.dumps(raw, ensure_ascii=False),
         "tags": ["outbound", "handelsregister", "munich",
                  *( [r.inferred_sector] if r.inferred_sector else [] )],
         "dedup_hash": f"handelsregister:{dedup}",

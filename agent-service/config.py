@@ -30,6 +30,11 @@ DB_WIRED   = _flag("DB_WIRED", not USE_STUBS)
 APPLY_LIVE = _flag("APPLY_LIVE", not USE_STUBS)
 QUERY_LIVE = _flag("QUERY_LIVE", not USE_STUBS)
 
+# When true, 500s return the real error message + traceback tail in the JSON response
+# (instead of a generic "Internal Server Error"). Great for fast debugging; turn off for a
+# polished demo. Set DEBUG_ERRORS=true in Render while wiring things up.
+DEBUG_ERRORS = _flag("DEBUG_ERRORS", False)
+
 # Handelsregister connector backend: fixture (default, safe/demo) | bundesapi | openregister
 HANDELSREGISTER_BACKEND = os.getenv("HANDELSREGISTER_BACKEND", "fixture")
 HANDELSREGISTER_API_KEY = os.getenv("HANDELSREGISTER_API_KEY", "")
