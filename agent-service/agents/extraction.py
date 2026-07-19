@@ -30,7 +30,21 @@ def extract_claims_from_text(text: str) -> dict:
 
 
 # --- helper: render a PDF to base64 data-URLs for the multimodal call ---
-def pdf_to_images(deck_bytes: bytes) -> list[str]:
-    """TODO: render pages with pypdf/pdf2image -> base64 'data:image/png;base64,...' URLs.
-    For a text-only fallback, extract text with pypdf and pass via page_text instead."""
-    raise NotImplementedError("wire in H1-H6")
+def pdf_to_images(deck_bytes: bytes, max_pages: int = 20, dpi: int = 120) -> list[str]:
+    """Render deck pages to base64 PNG data-URLs for the multimodal model. Uses PyMuPDF (self-
+    contained, no system poppler needed). Caps pages, rejects encrypted PDFs."""
+    import base64
+    import fitz  # pymupdf
+    doc = fitz.open(stream=deck_bytes, filetype="pdf")
+    if getattr(doc, "needs_pass", False):
+        raise RuntimeError("deck is password-protected — cannot read")
+    urls = []
+    for i, page in enumerate(doc):
+        if i >= max_pages:
+            break
+        pix = page.get_pixmap(dpi=dpi)
+        b64 = base64.b64encode(pix.tobytes("png")).decode()
+        urls.append(f"data:image/png;base64,{b64}")
+    if not urls:
+        raise RuntimeError("no pages rendered from deck")
+    return urls

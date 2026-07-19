@@ -68,6 +68,15 @@ def link_signal(signal_id, founder_id, company_id):
         "signal_id", signal_id).execute()
 
 
+def create_opportunity(company_id, founder_id, source, stage, first_signal_at) -> str:
+    """General opportunity creator (inbound or outbound)."""
+    row = supabase_client().table("opportunities").insert({
+        "company_id": company_id, "founder_id": founder_id, "source": source,
+        "stage": stage, "first_signal_at": first_signal_at,
+    }).execute().data[0]
+    return row["opportunity_id"]
+
+
 def create_outbound_opportunity(company_id, founder_id, first_signal_at) -> str:
     """Create an outbound opportunity at stage 'sourcing' so it lands on the board and can be
     scored by the same funnel as inbound. Axes stay null until the scorer runs."""
