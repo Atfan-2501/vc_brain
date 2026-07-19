@@ -41,6 +41,8 @@ SCORING_LIVE = _flag("SCORING_LIVE", not USE_STUBS)
 WEB_ENRICH = _flag("WEB_ENRICH", not USE_STUBS)
 #   MEMO_LIVE -> /memo runs the Memo Agent (OpenAI): 5-section memo + decision (needs OPENAI + DB).
 MEMO_LIVE = _flag("MEMO_LIVE", not USE_STUBS)
+#   SCREEN_GATES -> a failed thesis screen STOPS full analysis (axes+memo). False = advisory only.
+SCREEN_GATES = _flag("SCREEN_GATES", True)
 
 # When true, 500s return the real error message + traceback tail in the JSON response
 # (instead of a generic "Internal Server Error"). Great for fast debugging; turn off for a

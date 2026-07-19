@@ -71,9 +71,11 @@ def run_pipeline(opportunity_id: str, deck_bytes: bytes) -> str:
         db.append_founder_score(founder_id, s["score"], s["interval"])
         db.set_pre_track_record(founder_id, s["is_pre_track_record"])
 
-    # reuse the SAME reasoning as outbound: 3 independent axes, then memo + decision
+    # reuse the SAME reasoning as outbound: thesis screen -> 3 axes -> memo + decision.
+    # If the screener gates it out (off-thesis), skip the memo.
     from scoring import score_opportunity
     from memo_build import build_memo
-    score_opportunity(opportunity_id)
-    build_memo(opportunity_id)
+    res = score_opportunity(opportunity_id)
+    if not res.get("screened_out"):
+        build_memo(opportunity_id)
     return opportunity_id

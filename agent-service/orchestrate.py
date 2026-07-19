@@ -24,9 +24,11 @@ def run_selected(opportunity_ids: list[str], steps: list[str]) -> dict:
                 enrich_one(core["founder_id"])
                 r["enriched"] = True
             if "score" in steps and config.SCORING_LIVE:
-                score_opportunity(oid)
+                res = score_opportunity(oid)
                 r["scored"] = True
-            if "memo" in steps and config.MEMO_LIVE:
+                r["screened_out"] = bool(res.get("screened_out"))
+            # skip the memo for off-thesis founders (screened out) — no point analyzing them
+            if "memo" in steps and config.MEMO_LIVE and not r.get("screened_out"):
                 build_memo(oid)
                 r["memo"] = True
         except Exception as e:

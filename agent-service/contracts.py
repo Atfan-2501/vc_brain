@@ -63,6 +63,7 @@ class OpportunityCard(BaseModel):
     is_pre_track_record: bool = False
     axes: dict[str, AxisBrief]   # keys: founder, market, idea_vs_market
     has_contradiction: bool = False   # so the board can show the dot without fetching detail
+    thesis_fit: Optional[str] = None  # strong | partial | off_thesis (from the screener)
     decision: Optional[str] = None
     first_signal_at: Optional[str] = None
     decided_at: Optional[str] = None
@@ -118,6 +119,9 @@ class OpportunityDetail(BaseModel):
     memo: Memo
     contradictions: list[dict] = []
     decision: Decision
+    thesis_fit: Optional[str] = None          # strong | partial | off_thesis
+    passed_screen: Optional[bool] = None
+    screen_rationale: Optional[str] = None
     reasoning_log_id: Optional[str] = None
     first_signal_at: Optional[str] = None
     decided_at: Optional[str] = None

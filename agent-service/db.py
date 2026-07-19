@@ -207,6 +207,9 @@ def get_opportunity_detail(opportunity_id) -> dict | None:
             "most_decisive_missing_datum": r.get("most_decisive_missing_datum"),
         },
         "reasoning_log_id": r.get("reasoning_log_id") or r["opportunity_id"],
+        "thesis_fit": r.get("thesis_fit"),
+        "passed_screen": r.get("passed_screen"),
+        "screen_rationale": r.get("screen_rationale"),
         "first_signal_at": r.get("first_signal_at"), "decided_at": r.get("decided_at"),
     }
 
@@ -530,6 +533,7 @@ def _row_to_card(r: dict, flagged_company_ids: set | None = None) -> dict:
         },
         # board-level flag so the UI shows the contradiction dot without fetching detail.
         "has_contradiction": r.get("company_id") in flagged_company_ids,
+        "thesis_fit": r.get("thesis_fit"),
         "decision": r.get("decision_recommendation"),
         "first_signal_at": r.get("first_signal_at"), "decided_at": r.get("decided_at"),
     }

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import config
 import db
-from agents import axis_scorer
+from agents import axis_scorer, screener
 
 
 def score_opportunity(opportunity_id: str, persist: bool = True) -> dict:
@@ -17,6 +17,18 @@ def score_opportunity(opportunity_id: str, persist: bool = True) -> dict:
     claims = db.claims_for_company(core["company_id"])
     founder_score = db.founder_score_for(core["founder_id"]) if core.get("founder_id") else None
 
+    # 0. THESIS SCREEN — fast fit/viability filter before the expensive axis scoring.
+    scr = screener.screen(claims, thesis)
+    if persist:
+        db.update_opportunity(opportunity_id, {
+            "passed_screen": scr["passes_screen"], "thesis_fit": scr["thesis_fit"],
+            "screen_rationale": scr["rationale"], "reasoning_log_id": opportunity_id})
+        db.log_reasoning(opportunity_id, "screener", 0, "thesis screen", scr, config.OPENAI_MODEL)
+    # gate: off-thesis / non-viable -> stop here, don't spend on axes or memo
+    if config.SCREEN_GATES and not scr["passes_screen"]:
+        return {"opportunity_id": opportunity_id, "screened_out": True,
+                "thesis_fit": scr["thesis_fit"], "kill_reasons": scr.get("kill_reasons", [])}
+
     # three independent OpenAI calls (Founder / Market / Idea-vs-Market). Never combined.
     axes = axis_scorer.score_all_axes(claims, thesis, founder_score)
 
@@ -25,7 +37,7 @@ def score_opportunity(opportunity_id: str, persist: bool = True) -> dict:
         for i, (name, ax) in enumerate(axes.items(), start=1):
             db.log_reasoning(opportunity_id, "axis_scorer", i, f"axis: {name}",
                              ax, config.OPENAI_MODEL)
-    return {"opportunity_id": opportunity_id, "axes": axes}
+    return {"opportunity_id": opportunity_id, "axes": axes, "screened_out": False}
 
 
 def score_all_unscored(limit: int | None = None) -> dict:
