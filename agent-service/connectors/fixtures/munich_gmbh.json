@@ -1,114 +1,1322 @@
 [
   {
-    "company_name": "Kessler AI GmbH",
+    "company_name": "Veritas Vigor GmbH",
     "register_court": "München",
     "register_type": "HRB",
-    "register_number": "289431",
-    "legal_form": "GmbH",
-    "city": "München",
-    "postal_code": "80333",
-    "street": "Luisenstraße 14",
-    "managing_directors": ["Jana Kessler"],
-    "business_purpose": "Entwicklung und Vertrieb von Software fuer KI-Inferenz-Infrastruktur und Machine-Learning-Tooling.",
-    "registered_on": "2026-02-11",
-    "source_url": "https://www.handelsregister.de/rp_web/"
-  },
-  {
-    "company_name": "Reinhardt Data GmbH",
-    "register_court": "München",
-    "register_type": "HRB",
-    "register_number": "290117",
-    "legal_form": "GmbH",
-    "city": "München",
-    "postal_code": "80539",
-    "street": "Ludwigstraße 8",
-    "managing_directors": ["Tomas Reinhardt"],
-    "business_purpose": "Datenplattform und Analytics-Software fuer industrielle Kunden; KI-gestuetzte Datenpipelines.",
-    "registered_on": "2026-01-28",
-    "source_url": "https://www.handelsregister.de/rp_web/"
-  },
-  {
-    "company_name": "Isar Robotics GmbH",
-    "register_court": "München",
-    "register_type": "HRB",
-    "register_number": "291842",
-    "legal_form": "GmbH",
-    "city": "München",
-    "postal_code": "80805",
-    "street": "Domagkstraße 33",
-    "managing_directors": ["Felix Sommer", "Lena Vogt"],
-    "business_purpose": "Entwicklung autonomer mobiler Roboter fuer Logistik und Intralogistik.",
-    "registered_on": "2026-06-30",
-    "source_url": "https://www.handelsregister.de/rp_web/"
-  },
-  {
-    "company_name": "NeuroForge Labs GmbH",
-    "register_court": "München",
-    "register_type": "HRB",
-    "register_number": "292051",
-    "legal_form": "GmbH",
-    "city": "München",
-    "postal_code": "80333",
-    "street": "Theresienstraße 41",
-    "managing_directors": ["Amir Haddad"],
-    "business_purpose": "Forschung und Entwicklung im Bereich neuromorpher Recheninfrastruktur und Edge-KI-Chips.",
-    "registered_on": "2026-07-05",
-    "source_url": "https://www.handelsregister.de/rp_web/"
-  },
-  {
-    "company_name": "Weissblau Fintech GmbH",
-    "register_court": "München",
-    "register_type": "HRB",
-    "register_number": "292233",
-    "legal_form": "GmbH",
+    "register_number": "314560",
+    "legal_form": "gmbh",
     "city": "München",
     "postal_code": "80331",
-    "street": "Sendlinger Straße 12",
-    "managing_directors": ["Carla Neumann"],
-    "business_purpose": "Software fuer Zahlungsabwicklung und eingebettete Finanzdienstleistungen (Embedded Finance).",
-    "registered_on": "2026-06-18",
-    "source_url": "https://www.handelsregister.de/rp_web/"
+    "street": "Ledererstraße 19",
+    "managing_directors": [
+      "Marco Schum"
+    ],
+    "business_purpose": "Betreiben einer Agentur für Kommunikation- und Networking-Events, branchenübergreifende Networking-Events mit wechselnden Referenten zu unterschiedlichen Themen für Führungskräfte und selbstständige Unternehmer.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314560",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "82.30"
+    ]
   },
   {
-    "company_name": "Pinakothek Bio GmbH",
+    "company_name": "GovernLens GmbH",
     "register_court": "München",
     "register_type": "HRB",
-    "register_number": "292490",
-    "legal_form": "GmbH",
+    "register_number": "314558",
+    "legal_form": "gmbh",
     "city": "München",
-    "postal_code": "81377",
-    "street": "Grosshaderner Straße 9",
-    "managing_directors": ["Dr. Sophie Bauer"],
-    "business_purpose": "Entwicklung von KI-Modellen fuer die Wirkstoffforschung und computergestuetzte Molekuelanalyse.",
-    "registered_on": "2026-07-09",
-    "source_url": "https://www.handelsregister.de/rp_web/"
+    "postal_code": "81475",
+    "street": "Argelsrieder Str. 11",
+    "managing_directors": [
+      "Leon Richard Samuel Braun",
+      "Moritz Carl von Raczeck"
+    ],
+    "business_purpose": "Entwicklung, Betrieb und Vertrieb von Software sowie von Daten- und KIgestützten Produkten und Diensten, Beratung in den Bereichen Digitalisierung und Künstliche Intelligenz sowie damit verbundene Informations-, Analyse- und Beratungsdienstleistungen, insbesondere im Bereich der Erfassung, Strukturierung, Analyse und Aufbereitung politisch und regulatorisch relevanter Informationen (politische Information und Analyse) sowie der politischen Beratung.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314558",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "62.10",
+      "62.20",
+      "94.99"
+    ]
   },
   {
-    "company_name": "Giesing Devtools GmbH",
+    "company_name": "VM Gastro Verwaltungs GmbH",
     "register_court": "München",
     "register_type": "HRB",
-    "register_number": "292615",
-    "legal_form": "GmbH",
+    "register_number": "314557",
+    "legal_form": "gmbh",
     "city": "München",
-    "postal_code": "81541",
-    "street": "Tegernseer Landstraße 50",
-    "managing_directors": ["Jonas Fischer"],
-    "business_purpose": "Open-Source-Entwicklerwerkzeuge und Continuous-Integration-Software fuer Softwareteams.",
-    "registered_on": "2026-07-12",
-    "source_url": "https://www.handelsregister.de/rp_web/"
+    "postal_code": "81543",
+    "street": "Albrecht-Dürer-Str. 15 c/o Valentin Misli",
+    "managing_directors": [
+      "Valentin Yasar Misli"
+    ],
+    "business_purpose": "Führung und Betrieb gastronomischer Einrichtungen und alle damit zusammenhängenden Tätigkeiten sowie Beteiligung an anderen Unternehmen, insbesondere auch als persönlich haftende Gesellschafterin bei Kommanditgesellschaften. Genehmigungspflichtige Tätigkeiten sind nicht Gegenstand des Unternehmens.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314557",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "56.11"
+    ]
   },
   {
-    "company_name": "Schwabing Energy GmbH",
+    "company_name": "Formalize Deutschland GmbH",
     "register_court": "München",
     "register_type": "HRB",
-    "register_number": "292788",
-    "legal_form": "GmbH",
+    "register_number": "314549",
+    "legal_form": "gmbh",
+    "city": "Berlin",
+    "postal_code": "10115",
+    "street": "Rheinsberger Straße 77 a",
+    "managing_directors": [
+      "Jakob Emanuel Loftlund Lilholm"
+    ],
+    "business_purpose": "Erbringung konzerninterner Dienstleistungen für verbundene Unternehmen der Formalize- Gruppe, insbesondere in den Bereichen Vertriebsunterstützung, Customer Success, Marketing, Implementierungsunterstützung sowie administrativer, operativer und sonstiger unterstützender Dienstleistungen im Zusammenhang mit Compliance-Management-Softwarelösungen. Die Gesellschaft entwickelt, hält oder verwertet keine Software oder sonstigen Immaterialgüterrechte eigenständig und bietet Produkte oder Dienstleistungen nicht selbständig gegenüber Dritten an, es sei denn, dies erfolgt ausdrücklich auf Weisung und im Namen verbundener Unternehmen.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314549",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "82.10"
+    ]
+  },
+  {
+    "company_name": "nathanael project UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314547",
+    "legal_form": "gmbh",
     "city": "München",
-    "postal_code": "80798",
-    "street": "Hohenzollernstraße 21",
-    "managing_directors": ["Marie Lang", "Paul Richter"],
-    "business_purpose": "KI-gestuetzte Optimierung von Stromnetzen und Software fuer Energiemanagement.",
-    "registered_on": "2026-07-14",
-    "source_url": "https://www.handelsregister.de/rp_web/"
+    "postal_code": "80331",
+    "street": "Tal 44",
+    "managing_directors": [
+      "Nathanael Samson David Obermayer"
+    ],
+    "business_purpose": "Verwaltung eigenen Vermögens",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314547",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.91"
+    ]
+  },
+  {
+    "company_name": "MRH Logistik & Transport UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314548",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81243",
+    "street": "Brachvogelstr. 5",
+    "managing_directors": [
+      "Oussama Mejri"
+    ],
+    "business_purpose": "Transport- und Logistikdienstleitungen, Kurierdienste sowie nationale und internationale Güterbeförderung.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314548",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "49.41",
+      "53.20",
+      "52.26"
+    ]
+  },
+  {
+    "company_name": "BAMM Germany UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314526",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80638",
+    "street": "Mareesstr. 7",
+    "managing_directors": [
+      "Alexander Domin"
+    ],
+    "business_purpose": "Gründung, Erwerb, Halten und Verwalten von Beteiligungen an anderen Unternehmen sowie Verwaltung eigenen Vermögens, insbesondere von Immobilien und Wertpapieren, jeweils im eigenen Namen und auf eigene Rechnung.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314526",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.21"
+    ]
+  },
+  {
+    "company_name": "SwanCap TopCo GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314559",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81679",
+    "street": "Montgelasstraße 14",
+    "managing_directors": [
+      "Katja Gogalla",
+      "Sandra Luther",
+      "Eva Maria Reiter",
+      "Claudius Collin Remppis",
+      "Florian Kreitmeier",
+      "Andreas Bohn"
+    ],
+    "business_purpose": "Erwerb, Halten und Verwalten sowie Veräußerung eigenen Vermögens.",
+    "registered_on": "2025-06-03",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314559",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.99"
+    ]
+  },
+  {
+    "company_name": "Rarsig Medical Group International GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314538",
+    "legal_form": "gmbh",
+    "city": "Grünwald",
+    "postal_code": "82031",
+    "street": "Hans-Braun-Weg 5 a",
+    "managing_directors": [
+      "Anja Lüdke",
+      "Lin Yang",
+      "Ronald Waldemar Sarbacher"
+    ],
+    "business_purpose": "Forschung, Entwicklung, Validierung, Lizenzierung, technische Beratung, Technologietransfer sowie wirtschaftliche Verwertung von Technologien, Produkten, Verfahren und Dienstleistungen in den Bereichen Biotechnologie, Zelltechnologie, Immunologie, regenerative Medizin, Laborentwicklung, biologische Reagenzien, Kulturmedien, Laborverbrauchsmaterialien, medizinisch-wissenschaftliche Datenanalyse und begleitende Life-Science-Dienstleistungen. Die Gesellschaft kann insbesondere Forschungs-, Entwicklungs-, Qualitätskontroll- und Analyselabore planen, aufbauen, betreiben oder betreiben lassen, wissenschaftliche und technische Kooperationen mit Kliniken, Universitäten, Forschungsinstituten und Unternehmen eingehen, Schulungs-, Beratungs- und Projektmanagementleistungen erbringen sowie Rechte an geistigem Eigentum erwerben, halten, verwalten, lizenzieren und verwerten. Die Gesellschaft kann Produkte, Geräte, Reagenzien, Laborverbrauchsmaterialien, Kulturmedien, Software, Dokumentationssysteme und sonstige Life-Science-bezogene Waren entwickeln, vertreiben, importieren und exportieren, soweit dies gesetzlich zulässig ist. Erlaubnispflichtige Tätigkeiten, insbesondere die Herstellung, Prüfung, Lagerung, Einfuhr, Ausfuhr oder das Inverkehrbringen von Arzneimitteln, Zelloder Gewebeprodukten, Medizinprodukten oder sonstigen regulierten Produkten, werden nur ausgeübt, soweit die hierfür erforderlichen behördlichen Erlaubnisse, Genehmigungen, Anzeigen, Registrierungen oder Zertifizierungen vorliegen. Die Gesellschaft erbringt selbst keine ärztlichen Heilbehandlungen, betreibt keine ärztliche Praxis und nimmt keine Tätigkeiten vor, die approbierten Ärzten, zugelassenen medizinischen Einrichtungen oder sonstigen besonders erlaubnispflichtigen Leistungserbringern vorbehalten sind, sofern nicht die gesetzlichen Voraussetzungen erfüllt sind. Die Gesellschaft ist zu allen Geschäften und Maßnahmen berechtigt, die dem Unternehmensgegenstand unmittelbar oder mittelbar zu dienen geeignet sind.",
+    "registered_on": "2024-11-22",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314538",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "72.10",
+      "71.20",
+      "46.46"
+    ]
+  },
+  {
+    "company_name": "Haase Verwaltungs GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314530",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81827",
+    "street": "Heuluss 47",
+    "managing_directors": [
+      "Heidemarie Haase"
+    ],
+    "business_purpose": "Halten und Verwalten eigenen Vermögens sowie Wahrnehmung von Verwaltungsaufgaben in anderen Gesellschaften und/oder rechtsfähigen Stiftungen bürgerlichen Rechts, insbesondere der Heidemarie Haase Stiftung.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314530",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "70.10"
+    ]
+  },
+  {
+    "company_name": "Uncite Capital GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314533",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81825",
+    "street": "Hochalmstr. 12",
+    "managing_directors": [
+      "Anthony Oscar Okoth"
+    ],
+    "business_purpose": "Erwerb, Halten, Verwaltung und Veräußerung von Beteiligungen an anderen Unternehmen im eigenen Namen und für eigene Rechnung, Verwaltung eigenen Vermögens, insbesondere Anlage in Wertpapiere, Beteiligungen, Immobilien, sowie Erbringen von Management-, Beratungs- und Verwaltungsleistungen gegenüber verbundenen Unternehmen. Die Gesellschaft ist nicht erlaubnispflichtig tätig; Tätigkeiten, die einer behördlichen Erlaubnis bedürfen, insbesondere nach dem KWG oder KAG, sind ausgeschlossen.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314533",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "70.10",
+      "64.99"
+    ]
+  },
+  {
+    "company_name": "RUUMÉ GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314532",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81929",
+    "street": "Wildrosenweg 22",
+    "managing_directors": [
+      "Bastian Frédérick Stölten"
+    ],
+    "business_purpose": "Erbringung von Beratungs-, Analyse-, Konzeptions- und Vermittlungsleistungen im Bereich Immobilien, Büro- und Gewerbeflächen, Workplace Strategy, Real Estate Advisory, Nutzer- und Eigentümerberatung, Flächen- und Standortanalysen, digitale Immobilienvermarktung, Entwicklung und Betrieb digitaler Vermarktungs- und Visualisierungslösungen, insbesondere virtueller Showrooms, Objektwebseiten, digitaler Entscheidungssysteme sowie Entwicklung, Vermarktung und Lizenzierung entsprechender Technologien und Produkte. Genehmigungspflichtige Tätigkeiten werden nur nach Vorliegen der jeweils erforderlichen behördlichen Erlaubnisse ausgeübt.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314532",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "70.20",
+      "68.31",
+      "62.10"
+    ]
+  },
+  {
+    "company_name": "NovaSan UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314525",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81243",
+    "street": "Ravensburger Ring 10",
+    "managing_directors": [
+      "Hasan Karadza"
+    ],
+    "business_purpose": "Abbruch von asbesthaltigen Materialien sowie deren umweltgerechte Entsorgung, ausgenommen genehmigungspflichtige Tätigkeiten.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314525",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "43.99"
+    ]
+  },
+  {
+    "company_name": "CYRCL GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314524",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80796",
+    "street": "Belgradstr. 38",
+    "managing_directors": [
+      "Tara Ginger Gansfort"
+    ],
+    "business_purpose": "Betrieb eines Regenerationsstudios zur Erhaltung und Verbesserung der körperlichen und mentalen Leistungsfähigkeit.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314524",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "96.23"
+    ]
+  },
+  {
+    "company_name": "Munich Investment Capital GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314517",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80469",
+    "street": "Wittelsbacherstr. 5",
+    "managing_directors": [
+      "Cornelia Gimmler"
+    ],
+    "business_purpose": "Halten und Verwalten eigenen Vermögens, insbesondere von Beteiligungen an anderen Unternehmen, ausschließlich im eigenen Namen und auf eigene Rechnung. Erlaubnispflichtige Tätigkeiten werden nicht ausgeübt.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314517",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.21"
+    ]
+  },
+  {
+    "company_name": "FT Scarlet Three GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314516",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80538",
+    "street": "Maximilianstraße 52",
+    "managing_directors": [
+      "Matthias Beer"
+    ],
+    "business_purpose": "Verwaltung eigenen Vermögens",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314516",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.91"
+    ]
+  },
+  {
+    "company_name": "FT Scarlet Two GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314515",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80538",
+    "street": "Maximilianstraße 52",
+    "managing_directors": [
+      "Matthias Beer"
+    ],
+    "business_purpose": "Verwaltung eigenen Vermögens",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314515",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.91"
+    ]
+  },
+  {
+    "company_name": "Camel Invest GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314511",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81925",
+    "street": "Gellertstr. 8",
+    "managing_directors": [
+      "Patrick Olivier Marc Ayad"
+    ],
+    "business_purpose": "Verwaltung eigenen Vermögens",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314511",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.91"
+    ]
+  },
+  {
+    "company_name": "FT Scarlet One GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314513",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80538",
+    "street": "Maximilianstraße 52",
+    "managing_directors": [
+      "Matthias Beer"
+    ],
+    "business_purpose": "Verwaltung eigenen Vermögens",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314513",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.91"
+    ]
+  },
+  {
+    "company_name": "BenJo Capital UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314509",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80636",
+    "street": "Dachauer Str. 157",
+    "managing_directors": [
+      "Benedikt Johannes Jocham"
+    ],
+    "business_purpose": "Erwerb, Halten und Verwaltung von Beteiligungen an in- und ausländischen Unternehmen jeder Rechtsform.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314509",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.21"
+    ]
+  },
+  {
+    "company_name": "Sissi Schönheit GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314503",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80335",
+    "street": "Karlsplatz 3",
+    "managing_directors": [
+      "Cheng-An Mo"
+    ],
+    "business_purpose": "Vertrieb von taiwanesischen Kosmetik- und Hautpflege-Prestigemarken sowie von professionellen Haut- und Schönheitspflegeprodukten. Genehmigungs-/erlaubnispflichtige Tätigkeiten sind nicht Gegenstand des Unternehmens.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314503",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "46.45"
+    ]
+  },
+  {
+    "company_name": "SP10 Ventures UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314502",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80686",
+    "street": "Friedenheimer Straße 148",
+    "managing_directors": [
+      "William Gianluca Homburg"
+    ],
+    "business_purpose": "Erwerb sowie Halten und Verwalten von Unternehmensbeteiligungen.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314502",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.21"
+    ]
+  },
+  {
+    "company_name": "Rahmanian Capital UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314499",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80469",
+    "street": "Baaderstr. 82",
+    "managing_directors": [
+      "Fuzhan Rahmanian"
+    ],
+    "business_purpose": "Verwaltung eigenen Vermögens, insbesondere Halten und Verwalten von Beteiligungen an Unternehmen im eigenen Namen und auf eigene Rechnung.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314499",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.21"
+    ]
+  },
+  {
+    "company_name": "Taxivo Software UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314500",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80802",
+    "street": "Leopoldstraße 31",
+    "managing_directors": [
+      "Ben Blank",
+      "Nils Kießner"
+    ],
+    "business_purpose": "Entwicklung, Vertrieb und Betrieb von Softwarelösungen und digitalen Produkten aller Art sowie Erbringung damit verbundener IT-Dienstleistungen; ferner strategische und technische Unternehmensberatung, insbesondere in den Bereichen Prozessautomatisierung, Digitalisierung und Künstliche Intelligenz (KI).",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314500",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "62.10",
+      "62.20",
+      "62.20"
+    ]
+  },
+  {
+    "company_name": "Whiteline Productions UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314498",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81925",
+    "street": "Oberföhringer Str. 186",
+    "managing_directors": [
+      "Lawrence Agbani"
+    ],
+    "business_purpose": "Planung, Beratung und Durchführung von Veranstaltungen sowie Erbringung von Dienstleistungen im Bereich Veranstaltungstechnik, insbesondere Licht-, Ton- und Videotechnik, einschließlich Vermietung von technischem Equipment, Produktion von audiovisuellen Inhalten, Durchführung von Schulungen und Workshops sowie Handel mit veranstaltungstechnischem Zubehör und alle damit verbundenen Tätigkeiten.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314498",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "82.30",
+      "77.39",
+      "85.59",
+      "59.11"
+    ]
+  },
+  {
+    "company_name": "Base Padel GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314495",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81737",
+    "street": "Ottobrunner Straße 16",
+    "managing_directors": [
+      "Benjamin Paul Felsensteiner",
+      "Martin Pfaff"
+    ],
+    "business_purpose": "Errichtung, Erwerb, Anmietung, Betrieb und Verwaltung von Sport- und Freizeitanlagen, insbesondere Padelanlagen und Padelhallen, im In- und Ausland. Ferner Erbringung samtlicher Dienstleistungen im Bereich Sport, Freizeit, Gesundheit und Hospitality, insbesondere: Betrieb von Gastronomie-, Cafe- und Barbereichen; Organisation, Durchführung und Vermarktung von Sportveranstaltungen, Turnieren, Ligen, Camps, Events sowie sonstigen Freizeit- und Firmenveranstaltungen im In- und Ausland; Durchführung von Trainings-, Coaching-, Ausbildungs- und Kursangeboten sowie Vermittlung von Trainern; Betrieb und Vermietung von Sportanlagen sowie Vermietung von Flächen und Räumlichkeiten; Handel, Vertrieb sowie Import und Export von Sportartikeln, Bekleidung, Merchandise, Zubehör sowie sonstigen Waren; Erbringung von Wellness-, Fitness-, Gesundheits- und Freizeitangeboten; Marketing-, Sponsoring-, Beratungs- und Managementleistungen im Sport- und Freizeitbereich; Entwicklung, Erwerb, Lizenzierung und Betrieb digitaler Plattformen, Software und Buchungssysteme im Zusammenhang mit den vorgenannten Tatigkeiten. Rechts- oder Steuerberatung ist nicht Gegenstand des Unternehmens.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314495",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "93.11",
+      "93.19",
+      "85.51",
+      "56.11",
+      "47.63"
+    ]
+  },
+  {
+    "company_name": "NauticAssure GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314491",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80992",
+    "street": "Riesstraße 25",
+    "managing_directors": [
+      "Norbert Porazik",
+      "Jonathan Posselt"
+    ],
+    "business_purpose": "Vermittlung, Beratung und Verwaltung von Versicherungs- und Finanzdienstleistungen, insbesondere im Bereich nautischer und maritimer Risiken sowie die Erbringung von sonstigen Dienstleistungen.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314491",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "66.22",
+      "66.19"
+    ]
+  },
+  {
+    "company_name": "Baron Vermögensverwaltungs GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314488",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81669",
+    "street": "Balanstraße 23",
+    "managing_directors": [
+      "Stefanie Baron",
+      "Nils Marquardt"
+    ],
+    "business_purpose": "Halten und Verwalten eigenen Vermögens.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314488",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.91"
+    ]
+  },
+  {
+    "company_name": "TS Capital Beteiligungs UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314487",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80331",
+    "street": "Tal 34",
+    "managing_directors": [
+      "Thomas Schmidle"
+    ],
+    "business_purpose": "Erwerb, das Halten und die Verwaltung von Beteiligungen ausschließlich im eigenen Namen und auf eigene Rechnung sowie die Verwaltung eigenen Vermögens. Die Gesellschaft übt keine erlaubnispflichtigen Tätigkeiten nach dem Kreditwesengesetz (KWG) oder dem Kapitalanlagegesetzbuch (KAGB) aus.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314487",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.21"
+    ]
+  },
+  {
+    "company_name": "RGC Capital GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314485",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80331",
+    "street": "Tal 44",
+    "managing_directors": [
+      "Roman Franz Gronau"
+    ],
+    "business_purpose": "Verwaltung eigenen Vermögens einschließlich Erwerb, Halten und die Verwaltung von Beteiligungen an Unternehmen, Wertpapieren und sonstigen Finanzinstrumenten sowie von Immobilien, jeweils ausschließlich für eigene Rechnung und nicht für Dritte. Genehmigungspflichtige Tätigkeiten sind nicht Gegenstand des Unternehmens. Eine Tätigkeit, die einer Erlaubnis nach dem Kreditwesengesetz (KWG), dem Wertpapierinstitutsgesetz (WpIG) oder dem Kapitalanlagegesetzbuch (KAGB) bedarf, wird nicht ausgeübt.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314485",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.21",
+      "64.99"
+    ]
+  },
+  {
+    "company_name": "TK Aubinger Boazn UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314484",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81243",
+    "street": "Limesstr. 112",
+    "managing_directors": [
+      "Oliver Wilhelm Sebastian Ketterer"
+    ],
+    "business_purpose": "Betrieb einer Dartkneipe mit Alkoholausschank.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314484",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "56.30"
+    ]
+  },
+  {
+    "company_name": "KD Capital Holding UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314486",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80538",
+    "street": "Oettingenstraße 30",
+    "managing_directors": [
+      "Kristijan Crnjac"
+    ],
+    "business_purpose": "Erwerb, das Halten und die Verwaltung von Beteiligungen an anderen Gesellschaften im In- und Ausland sowie der Erwerb, das Halten, die Verwaltung und die Verwertung von Immobilien und sonstigem Vermögen.",
+    "registered_on": "2026-07-17",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314486",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.21",
+      "68.20"
+    ]
+  },
+  {
+    "company_name": "Rosales Werte GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314482",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81673",
+    "street": "Kreillerstr. 56 b",
+    "managing_directors": [
+      "Pablo Antonio Rosales Robles"
+    ],
+    "business_purpose": "Erwerb, das Halten, die Modernisierung, Instandhaltung, Verwaltung, Vermietung, Verpachtung sowie die Veräußerung von eigenem Grundbesitz und eigenen grundstücksgleichen Rechten sowie die Verwaltung eigenen Kapitalvermögens. Die Gesellschaft ist berechtigt, sämtliche Geschäfte vorzunehmen, die dem Gesellschaftszweck unmittelbar oder mittelbar dienen. Die Gesellschaft übt keine erlaubnispflichtigen Tätigkeiten nach § 34c GewO aus und betreibt insbesondere keinen gewerblichen Grundstückshandel. Tätigkeiten, die nach dem Kreditwesengesetz (KWG) oder dem Kapitalanlagegesetzbuch (KAGB) erlaubnispflichtig sind, sind ausgeschlossen.",
+    "registered_on": "2026-07-16",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314482",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "68.20",
+      "68.32"
+    ]
+  },
+  {
+    "company_name": "Lithtech Power Storage GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314478",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80801",
+    "street": "Franz-Joseph-Str. 11",
+    "managing_directors": [
+      "Ting Liu"
+    ],
+    "business_purpose": "Handel mit Lithiumbatterien, Maschinen und maschinellen Anlagen, elektronischen Produkten sowie Batteriepacks.",
+    "registered_on": "2026-07-16",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314478",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "46.43",
+      "46.64"
+    ]
+  },
+  {
+    "company_name": "JS Ventures UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314474",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80799",
+    "street": "Barer Straße 54 e",
+    "managing_directors": [
+      "Johannes Sonnenschein"
+    ],
+    "business_purpose": "Verwaltung eigenen Vermögens sowie der Erwerb, das Halten und Verwalten von Beteiligungen an Unternehmen sowie die Erbringung von Unternehmensberatungsleistungen, ausgenommen Rechts- und Steuerberatung.",
+    "registered_on": "2026-07-16",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314474",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.21",
+      "70.20"
+    ]
+  },
+  {
+    "company_name": "heptus 671. GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314468",
+    "legal_form": "gmbh",
+    "city": "Berlin",
+    "postal_code": "10117",
+    "street": "Am Zirkus 2",
+    "managing_directors": [
+      "Cornelia Ulrike Ingeburg Wendt",
+      "Felix Ernst Neukamp"
+    ],
+    "business_purpose": "Verwaltung eigener Vermögenswerte",
+    "registered_on": "2026-07-16",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314468",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "64.21"
+    ]
+  },
+  {
+    "company_name": "Majores Ventures UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314448",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81673",
+    "street": "Truderinger Str. 126",
+    "managing_directors": [
+      "Alexander Majores"
+    ],
+    "business_purpose": "Erwerb, Halten, Verwaltung und Veräußerung von Beteiligungen an in- und ausländischen Unternehmen sowie Verwaltung eigenen Vermögens und Erbringung von Management-, Interimsmanagement-, Beratungs- und administrativen Dienstleistungen für verbundene Unternehmen und Dritte.",
+    "registered_on": "2026-07-16",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314448",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "70.10",
+      "64.21"
+    ]
+  },
+  {
+    "company_name": "in:health München GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314454",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80801",
+    "street": "Hohenzollernstr. 20",
+    "managing_directors": [
+      "Sebastian Walter"
+    ],
+    "business_purpose": "Entwicklung digitaler Produkte und Dienstleistungen im medizinischen Sektor und in der Physiotherapie, die Übernahme von Dienstleistungen und Verwaltungsaufgaben für sowie die Vermietung von Geschäftsräumen und beweglichen Sachen an Unternehmen und Angehörige freier Berufe im medizinischen Sektor, sowie alle mit dem vorgenannten Unternehmensgegenstand zusammenhängenden Dienstleistungen.",
+    "registered_on": "2026-07-16",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314454",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "62.10",
+      "82.10",
+      "68.20"
+    ]
+  },
+  {
+    "company_name": "VoroAI UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314447",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80636",
+    "street": "Dachauerstr. 102 A",
+    "managing_directors": [
+      "Firat Can Pekin"
+    ],
+    "business_purpose": "Entwicklung, Vertrieb und Betrieb von Software, insbesondere KI-basierten Softwarelösungen zur Automatisierung von Kommunikations- und Geschäftsprozessen, sowie Erbringung von Beratungs-, Schulungs- und sonstigen damit zusammenhängenden Dienstleistungen.",
+    "registered_on": "2026-07-16",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314447",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": null
+  },
+  {
+    "company_name": "BWM Barrierefrei Wohnen München GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314441",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81248",
+    "street": "Mahatma-Gandhi-Platz 4",
+    "managing_directors": [
+      "Anthony Müller"
+    ],
+    "business_purpose": "Beratung, Planung, Projektierung und Koordination von Maßnahmen zum barrierefreien, altersgerechten und komfortorientierten Umbau von Badezimmern und Sanitärräumen. Erlaubnispflichtige Tätigkeiten sind ausgenommen.",
+    "registered_on": "2026-07-16",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314441",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "74.13"
+    ]
+  },
+  {
+    "company_name": "EUTOP Munich GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314440",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81679",
+    "street": "Denninger Straße 15",
+    "managing_directors": [
+      "Klemens Joos",
+      "Christian Schaufler"
+    ],
+    "business_purpose": "Bereitstellung, Benennung und Koordination von Geschäftsführern und sonstigen Funktionsträgern der Gesellschaft als Key Account Manager für Unternehmen der EUTOP Group. Die Gesellschaft unterstützt insbesondere die Besetzung, Strukturierung und Koordination von Key-Account-Funktionen im Zusammenhang mit Kundenmandaten von Unternehmen der EUTOP Group. Eigene Beratungsleistungen gegenüber Dritten erbringt die Gesellschaft nicht. Erlaubnispflichtige Tätigkeiten sind ausgenommen.",
+    "registered_on": "2026-07-16",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314440",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "70.10"
+    ]
+  },
+  {
+    "company_name": "Core Human Alliance GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314439",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80333",
+    "street": "Brienner Straße 21",
+    "managing_directors": [
+      "Martina Leibfritz",
+      "Jörg Härlen",
+      "Hardy Kleiner"
+    ],
+    "business_purpose": "Betreiben, Beraten und Verwalten von Pflegeeinrichtungen im ambulanten und stationären Setting; Integrationseinrichtungen; stationären und ambulanten Psychiatrieeinrichtungen; Rehabilitationseinrichtungen; Einrichtungen der Heilhilfsberufe (z.B. Physio-, Ergo-, Logo-, Podologie u.ä.); weiteren Gesundheitseinrichtungen für präventive und kurative Maßnahmen. Die Gesellschaft tritt bundesweit auf.",
+    "registered_on": "2021-12-07",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314439",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "86.10",
+      "86.99",
+      "86.96"
+    ]
+  },
+  {
+    "company_name": "Aurum Domus UG (haftungsbeschränkt)",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314489",
+    "legal_form": "gmbh",
+    "city": "Schwabhausen",
+    "postal_code": "85247",
+    "street": "Justus-von-Liebig-Str. 15 a",
+    "managing_directors": [
+      "Markus Laaks",
+      "Markus Medele"
+    ],
+    "business_purpose": "Verwaltung eigener Immobilien",
+    "registered_on": "2019-12-20",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314489",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "68.20"
+    ]
+  },
+  {
+    "company_name": "Treuhand Solution Audit GmbH Wirtschaftsprüfungsgesellschaft",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314494",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "80637",
+    "street": "Landshuter Allee 14",
+    "managing_directors": [
+      "Axel Dirk Jung",
+      "Matthias Müller",
+      "Kevin Lucien Schneider"
+    ],
+    "business_purpose": "Die für Wirtschaftsprüfungsgesellschaften gesetzlich und berufsrechtlich zulässigen Tätigkeiten gemäß § 2 WPO in Verbindung mit § 43 a Abs. 4 WPO, insbesondere betriebswirtschaftliche Prüfungen von Jahresabschlüssen wirtschaftlicher Unternehmen durchzuführen. In wirtschaftlichen Angelegenheiten zu beraten und fremde Interessen zu wahren und die treuhänderische Verwaltung. Handels- und Bankgeschäfte sind ausgeschlossen. Die Erstellung von Steuererklärungen, Steuerberatung, die steuerliche Vertretung, die Erstellung von Jahresabschlüssen, Buchhaltungen, Lohn- und Gehaltsabrechnungen, Betreuung sowie Beirats- und Aufsichtsratstätigkeiten gehören nicht zum Gegenstand des Unternehmens.",
+    "registered_on": "2006-03-28",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314494",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": [
+      "69.20"
+    ]
+  },
+  {
+    "company_name": "Augustinum Ambulanter Pflegedienst Düsseldorf GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314520",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81375",
+    "street": "Stiftsbogen 74",
+    "managing_directors": [
+      "Uwe Peters",
+      "Carlo Tabacchi",
+      "Stefan Diederichs",
+      "Boris Hammerschmitt",
+      "Iris Gerlach",
+      "Marco Wittebrock",
+      "Christian Linke"
+    ],
+    "business_purpose": "Erbringung von Leistungen der häuslichen Pflege, die Erbringung von häuslicher Krankenpflege und Haushaltshilfe sowie aller damit verbundenen Tätigkeiten.",
+    "registered_on": "1999-07-23",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314520",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": 38,
+    "net_income_eur": null,
+    "industry_codes": [
+      "87.99"
+    ]
+  },
+  {
+    "company_name": "Vossen Frottierwarenvertriebs GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314456",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "81677",
+    "street": "Kronstadter Straße 4",
+    "managing_directors": [
+      "Peter Scheit",
+      "Maarten de Baat Doelman",
+      "Manfred Renerig",
+      "Wilhelm Haböck",
+      "Paul Mohr",
+      "Michael Unger",
+      "Marco Talasz"
+    ],
+    "business_purpose": "Handel und Vertrieb mit Frottierwaren und Haus- und Heimtextilien aller Art.",
+    "registered_on": "1997-07-07",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314456",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": 18,
+    "net_income_eur": 54248.08,
+    "industry_codes": [
+      "46.41"
+    ]
+  },
+  {
+    "company_name": "OPL Advisory GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314434",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "",
+    "street": "",
+    "managing_directors": [],
+    "business_purpose": "",
+    "registered_on": "",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314434",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": null
+  },
+  {
+    "company_name": "Brand Engagement Network Holding GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314432",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "",
+    "street": "",
+    "managing_directors": [],
+    "business_purpose": "",
+    "registered_on": "",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314432",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": null
+  },
+  {
+    "company_name": "Löper & Engel Rechtsanwälte und Steuerberater GmbH",
+    "register_court": "München",
+    "register_type": "HRB",
+    "register_number": "314382",
+    "legal_form": "gmbh",
+    "city": "München",
+    "postal_code": "",
+    "street": "",
+    "managing_directors": [],
+    "business_purpose": "",
+    "registered_on": "",
+    "source_url": "https://openregister.de/company/DE-HRB-D2601-314382",
+    "website": null,
+    "github_handle": null,
+    "linkedin_url": null,
+    "twitter_handle": null,
+    "revenue_eur": null,
+    "employees": null,
+    "net_income_eur": null,
+    "industry_codes": null
   }
 ]

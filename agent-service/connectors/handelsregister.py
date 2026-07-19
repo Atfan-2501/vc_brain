@@ -27,7 +27,15 @@ from pathlib import Path
 
 import config
 
-FIXTURE_PATH = Path(__file__).parent / "fixtures" / "munich_gmbh.json"
+_FIXTURE_DIR = Path(__file__).parent / "fixtures"
+
+
+def _fixture_path() -> Path:
+    """Prefer the user's harvested real data (munich_gmbh.json); fall back to the shipped
+    synthetic sample (munich_gmbh.sample.json). This keeps my code syncs from ever clobbering
+    the real harvested dataset."""
+    real = _FIXTURE_DIR / "munich_gmbh.json"
+    return real if real.exists() else _FIXTURE_DIR / "munich_gmbh.sample.json"
 
 # Munich postal codes are 80331-81929; the register court is "München".
 MUNICH_PLZ_PREFIXES = ("80", "81")
@@ -138,8 +146,11 @@ def _rate_limit_guard():
 
 # ---------------- backends ----------------
 def _fixture_records() -> list[HandelsregisterRecord]:
-    data = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
-    return [HandelsregisterRecord(**r) for r in data]
+    path = _fixture_path()
+    data = json.loads(path.read_text(encoding="utf-8"))
+    # tolerate extra keys stored alongside the dataclass fields
+    fields = set(HandelsregisterRecord.__dataclass_fields__)
+    return [HandelsregisterRecord(**{k: v for k, v in r.items() if k in fields}) for r in data]
 
 
 def _bundesapi_records(keywords: str) -> list[HandelsregisterRecord]:
@@ -193,11 +204,10 @@ def _or_request(method: str, path: str, key: str, body: dict | None = None) -> d
         raise RuntimeError(f"OpenRegister {method} {path} -> HTTP {e.code}: {detail}") from None
 
 
-def _openregister_records(keywords: str) -> list[HandelsregisterRecord]:
-    """Real data via openregister.de. Needs config.OPENREGISTER_API_KEY (free tier: 50 credits/mo).
-    Flow: 1 search (10 credits) -> client-side keep GmbHs -> up to OPENREGISTER_MAX_DETAILS
-    detail calls (10 credits each) for directors + purpose + incorporation date.
-    Verified against the OpenRegister OpenAPI schema (CompanyV1)."""
+def _openregister_records(keywords: str, skip_company_ids=None) -> list[HandelsregisterRecord]:
+    """Real data via openregister.de. Needs config.OPENREGISTER_API_KEY.
+    Paginates search pages (10 credits each) collecting non-shell GmbHs not in skip_company_ids,
+    then spends OPENREGISTER_MAX_DETAILS detail calls (10 credits each) for directors/purpose/etc."""
     import sys
     key = config.OPENREGISTER_API_KEY
     if not key:
@@ -211,15 +221,36 @@ def _openregister_records(keywords: str) -> list[HandelsregisterRecord]:
     ]
     if config.OPENREGISTER_MIN_INCORPORATED:                 # optional: newly-founded only
         filters.append({"field": "incorporated_at", "min": config.OPENREGISTER_MIN_INCORPORATED})
-    search = _or_request("POST", "/v1/search/company", key,
-                         {"filters": filters, "pagination": {"page": 1, "per_page": 50}})
-    results = search.get("results", [])
-    if config.OPENREGISTER_DEBUG:
-        print(f"[openregister] raw search results: {len(results)}; "
-              f"total={search.get('pagination', {}).get('total_results')}", file=sys.stderr)
-    stubs = [s for s in results
-             if s.get("legal_form") == "gmbh" and s.get("active", True)]
-    stubs = stubs[:config.OPENREGISTER_MAX_RESULTS]
+    # Walk search pages (each = 10 credits) collecting non-shell GmbHs we haven't harvested yet,
+    # until we have MAX_RESULTS or run out of pages. Skips already-harvested company_ids so a
+    # repeat harvest ADDS new companies instead of re-ingesting the old ones.
+    skip = set(skip_company_ids or set())
+    stubs: list[dict] = []
+    seen_shell = 0
+    page = 1
+    while len(stubs) < config.OPENREGISTER_MAX_RESULTS and page <= config.OPENREGISTER_MAX_PAGES:
+        search = _or_request("POST", "/v1/search/company", key,
+                             {"filters": filters, "pagination": {"page": page, "per_page": 100}})
+        results = search.get("results", [])
+        for s in results:
+            if s.get("legal_form") != "gmbh" or not s.get("active", True):
+                continue
+            if config.HANDELSREGISTER_EXCLUDE_SHELF and is_shell_company(s.get("name", "")):
+                seen_shell += 1
+                continue
+            cid = s.get("company_id")
+            if cid and cid in skip:
+                continue
+            stubs.append(s)
+            if len(stubs) >= config.OPENREGISTER_MAX_RESULTS:
+                break
+        total_pages = (search.get("pagination", {}) or {}).get("total_pages", page)
+        if config.OPENREGISTER_DEBUG:
+            print(f"[openregister] page {page}: got {len(results)}, kept so far {len(stubs)}, "
+                  f"shells skipped {seen_shell}", file=sys.stderr)
+        if page >= (total_pages or page) or not results:
+            break
+        page += 1
 
     out: list[HandelsregisterRecord] = []
     for i, stub in enumerate(stubs):
@@ -301,16 +332,17 @@ def _or_map_company(c: dict, stub: dict) -> HandelsregisterRecord:
 
 # ---------------- public entry point ----------------
 def search_munich(keywords: str = "", max_age_days: int | None = None,
-                  sectors: list[str] | None = None) -> list[HandelsregisterRecord]:
+                  sectors: list[str] | None = None,
+                  skip_company_ids=None) -> list[HandelsregisterRecord]:
     """Return Munich GmbH records, newest-first, filtered to Munich + optional freshness/sector.
-    keywords steer the live search; the fixture backend ignores them (returns all, then filters)."""
+    skip_company_ids: OpenRegister company_ids already harvested (so a repeat harvest ADDS new)."""
     backend = config.HANDELSREGISTER_BACKEND
     if backend == "fixture":
         records = _fixture_records()
     elif backend == "bundesapi":
         records = _bundesapi_records(keywords or "GmbH München")
     elif backend == "openregister":
-        records = _openregister_records(keywords or "")
+        records = _openregister_records(keywords or "", skip_company_ids=skip_company_ids)
     else:
         raise ValueError(f"unknown HANDELSREGISTER_BACKEND: {backend}")
 

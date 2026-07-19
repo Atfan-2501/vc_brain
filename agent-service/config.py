@@ -56,6 +56,8 @@ OPENREGISTER_MAX_RESULTS = int(os.getenv("OPENREGISTER_MAX_RESULTS", "20"))
 # free tier = 50 credits/mo, so 10 (search) + 4*10 = 50. Raise on a paid plan. The rest are
 # kept as lean records (name + register id) and filled in by the enrichment step.
 OPENREGISTER_MAX_DETAILS = int(os.getenv("OPENREGISTER_MAX_DETAILS", "4"))
+# how many search pages to walk (each = 10 credits) when gathering non-shell candidates.
+OPENREGISTER_MAX_PAGES = int(os.getenv("OPENREGISTER_MAX_PAGES", "6"))
 # optional recency filter (DD-MM-YYYY). Only return companies incorporated on/after this date,
 # to bias toward newly-founded startups. Empty = no recency filter (safest for non-empty results).
 OPENREGISTER_MIN_INCORPORATED = os.getenv("OPENREGISTER_MIN_INCORPORATED", "")
