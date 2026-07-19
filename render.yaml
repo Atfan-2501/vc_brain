@@ -10,6 +10,8 @@ services:
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
+      - key: PYTHON_VERSION         # pin to 3.12 (3.14 has no pydantic-core wheel -> Rust build fails)
+        value: "3.12.7"
       - key: USE_STUBS              # start stubbed so it works with no keys/DB
         value: "true"
       - key: OPENAI_MODEL

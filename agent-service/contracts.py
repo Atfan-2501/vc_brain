@@ -137,7 +137,7 @@ class QueryOut(BaseModel):
 
 # ---------- scan ----------
 class ScanIn(BaseModel):
-    channels: list[str] = ["show_hn", "producthunt"]
+    channels: list[str] = ["handelsregister"]   # the built connector; add show_hn/producthunt later
 
 
 class ScanOut(BaseModel):

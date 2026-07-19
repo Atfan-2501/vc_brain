@@ -23,12 +23,15 @@ app.add_middleware(
 
 @app.get("/health")
 def health():
-    return {"ok": True, "use_stubs": config.USE_STUBS}
+    return {"ok": True, "use_stubs": config.USE_STUBS,
+            "db_wired": config.DB_WIRED, "apply_live": config.APPLY_LIVE,
+            "query_live": config.QUERY_LIVE,
+            "handelsregister_backend": config.HANDELSREGISTER_BACKEND}
 
 
 @app.post("/thesis", response_model=ThesisOut)
 def save_thesis(body: ThesisIn):
-    if config.STUB_AGENTS["screener"]:  # thesis has no agent; gate on stub master
+    if not config.DB_WIRED:
         return ThesisOut(thesis_id=str(uuid.uuid4()))
     from db import upsert_thesis
     return upsert_thesis(body)
@@ -38,7 +41,7 @@ def save_thesis(body: ThesisIn):
 async def apply(background: BackgroundTasks,
                 company_name: str = Form(...), deck_file: UploadFile = File(...),
                 founder_name: str | None = Form(None)):
-    if config.USE_STUBS:
+    if not config.APPLY_LIVE:
         return ApplyOut(opportunity_id="e0000000-0000-0000-0000-000000000002")
     # Create the opportunity shell synchronously (fast) so we can return an id + 202 now,
     # then run the multi-agent pipeline in the background. The frontend polls
@@ -53,7 +56,7 @@ async def apply(background: BackgroundTasks,
 
 @app.get("/opportunities", response_model=OpportunitiesOut)
 def list_opportunities(stage: str | None = None, thesis_id: str | None = None):
-    if config.USE_STUBS:
+    if not config.DB_WIRED:
         return stub_data.STUB_OPPORTUNITIES
     from db import get_opportunities
     return get_opportunities(stage=stage, thesis_id=thesis_id)
@@ -61,7 +64,7 @@ def list_opportunities(stage: str | None = None, thesis_id: str | None = None):
 
 @app.get("/opportunities/{opportunity_id}", response_model=OpportunityDetail)
 def get_opportunity(opportunity_id: str):
-    if config.USE_STUBS:
+    if not config.DB_WIRED:
         return stub_data.STUB_DETAIL
     from db import get_opportunity_detail
     detail = get_opportunity_detail(opportunity_id)
@@ -72,7 +75,7 @@ def get_opportunity(opportunity_id: str):
 
 @app.post("/query", response_model=QueryOut)
 def query(body: QueryIn):
-    if config.STUB_AGENTS["query"]:
+    if not config.QUERY_LIVE:
         return stub_data.STUB_QUERY
     from agents.query import run_query
     return run_query(body.q)
@@ -80,8 +83,8 @@ def query(body: QueryIn):
 
 @app.post("/scan", response_model=ScanOut, status_code=202)
 def scan(body: ScanIn | None = None):
-    channels = (body.channels if body else None) or ["show_hn", "producthunt"]
-    if config.STUB_AGENTS["sourcing"]:
+    channels = (body.channels if body else None) or ["handelsregister"]
+    if not config.DB_WIRED:
         return ScanOut(scan_id=str(uuid.uuid4()), channels=channels)
     from sourcing import run_scan
     scan_id = run_scan(channels)
@@ -91,7 +94,7 @@ def scan(body: ScanIn | None = None):
 @app.get("/reasoning-log/{reasoning_log_id}", response_model=ReasoningLogOut)
 def get_reasoning_log(reasoning_log_id: str):
     """Agentic Traceability: the step-level chain-of-thought behind an opportunity's memo."""
-    if config.USE_STUBS:
+    if not config.DB_WIRED:
         return stub_data.STUB_REASONING_LOG
     from db import get_reasoning_log as fetch
     log = fetch(reasoning_log_id)
@@ -102,7 +105,7 @@ def get_reasoning_log(reasoning_log_id: str):
 
 @app.get("/founders/{founder_id}", response_model=FounderOut)
 def get_founder(founder_id: str):
-    if config.USE_STUBS:
+    if not config.DB_WIRED:
         return stub_data.STUB_FOUNDER
     from db import get_founder_profile
     profile = get_founder_profile(founder_id)

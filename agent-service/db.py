@@ -35,6 +35,49 @@ def update_opportunity(opportunity_id, fields: dict):
         "opportunity_id", opportunity_id).execute()
 
 
+def insert_signal(signal: dict) -> str | None:
+    """Insert a signal; return signal_id, or None if the dedup_hash already exists.
+    Dedup is how the same founder discovered via multiple sources doesn't double-count."""
+    sb = supabase_client()
+    existing = sb.table("signals").select("signal_id").eq(
+        "dedup_hash", signal["dedup_hash"]).limit(1).execute().data
+    if existing:
+        return None
+    return sb.table("signals").insert(signal).execute().data[0]["signal_id"]
+
+
+def insert_company(company: dict) -> str:
+    return supabase_client().table("companies").insert(company).execute().data[0]["company_id"]
+
+
+def upsert_founder_by_name(founder: dict) -> str:
+    """Identity resolution (name-based for now). If a founder with this name exists, reuse it
+    so the Founder Score follows the person across sources/companies; else create.
+    TODO H6-H9: strengthen with github_handle/linkedin_slug/domain matching, not just name."""
+    sb = supabase_client()
+    hit = sb.table("founders").select("founder_id").eq(
+        "name", founder["name"]).limit(1).execute().data
+    if hit:
+        return hit[0]["founder_id"]
+    return sb.table("founders").insert(founder).execute().data[0]["founder_id"]
+
+
+def link_signal(signal_id, founder_id, company_id):
+    supabase_client().table("signals").update(
+        {"founder_id": founder_id, "company_id": company_id}).eq(
+        "signal_id", signal_id).execute()
+
+
+def create_outbound_opportunity(company_id, founder_id, first_signal_at) -> str:
+    """Create an outbound opportunity at stage 'sourcing' so it lands on the board and can be
+    scored by the same funnel as inbound. Axes stay null until the scorer runs."""
+    row = supabase_client().table("opportunities").insert({
+        "company_id": company_id, "founder_id": founder_id, "source": "outbound",
+        "stage": "sourcing", "first_signal_at": first_signal_at,
+    }).execute().data[0]
+    return row["opportunity_id"]
+
+
 def log_reasoning(opportunity_id, agent, step, prompt, response, model):
     supabase_client().table("reasoning_log").insert({
         "opportunity_id": opportunity_id, "agent": agent, "step": step,
@@ -59,26 +102,121 @@ def get_opportunities(stage=None, thesis_id=None) -> dict:
     if stage:
         q = q.eq("stage", stage)
     rows = q.execute().data
-    # TODO: map each row -> contracts.OpportunityCard (axes as 3 separate objects)
-    return {"opportunities": [_row_to_card(r) for r in rows]}
+    # derive has_contradiction: company_ids that have >=1 contradicted claim
+    contradicted = sb.table("claims").select("company_id").eq(
+        "verification_status", "contradicted").execute().data
+    flagged = {c["company_id"] for c in contradicted}
+    return {"opportunities": [_row_to_card(r, flagged) for r in rows]}
 
 
 def get_opportunity_detail(opportunity_id) -> dict | None:
-    # TODO: fetch opportunity + claims + memo + reasoning_log_id, map to OpportunityDetail
-    raise NotImplementedError("wire in H1-H6")
+    sb = supabase_client()
+    rows = sb.table("opportunities").select(
+        "*, companies(name), founders(name, founder_score, founder_score_interval, is_pre_track_record)"
+    ).eq("opportunity_id", opportunity_id).limit(1).execute().data
+    if not rows:
+        return None
+    r = rows[0]
+    company = r.get("companies") or {}
+    founder = r.get("founders") or {}
+    claims = sb.table("claims").select("*").eq("company_id", r["company_id"]).execute().data
+    contradictions = [
+        {"claim_id": c["claim_id"], "note": c.get("contradiction_note"),
+         "evidence_url": c.get("verification_evidence_url")}
+        for c in claims if c.get("verification_status") == "contradicted"
+    ]
+    return {
+        "opportunity_id": r["opportunity_id"],
+        "company_name": company.get("name", ""),
+        "founder": {
+            "founder_id": r.get("founder_id"), "name": founder.get("name"),
+            "founder_score": founder.get("founder_score"),
+            "founder_score_interval": founder.get("founder_score_interval"),
+            "is_pre_track_record": founder.get("is_pre_track_record", False),
+        },
+        "axes": {
+            "founder": {"score": r.get("founder_axis_score"), "trend": r.get("founder_axis_trend"),
+                        "rationale": r.get("founder_axis_rationale"),
+                        "cited_claim_ids": r.get("founder_axis_claim_ids") or [], "swot": None},
+            "market": {"score": r.get("market_axis_score"), "trend": r.get("market_axis_trend"),
+                       "verdict": r.get("market_axis_verdict"),
+                       "rationale": r.get("market_axis_rationale"),
+                       "swot": r.get("market_axis_swot"),
+                       "cited_claim_ids": r.get("market_axis_claim_ids") or []},
+            "idea_vs_market": {"score": r.get("idea_axis_score"), "trend": r.get("idea_axis_trend"),
+                               "rationale": r.get("idea_axis_rationale"),
+                               "cited_claim_ids": r.get("idea_axis_claim_ids") or [], "swot": None},
+        },
+        "claims": [_claim_out(c) for c in claims],
+        "memo": r.get("memo") or {},
+        "contradictions": contradictions,
+        "decision": {
+            "recommendation": r.get("decision_recommendation"),
+            "rationale": r.get("decision_rationale"),
+            "most_decisive_missing_datum": r.get("most_decisive_missing_datum"),
+        },
+        "reasoning_log_id": r.get("reasoning_log_id") or r["opportunity_id"],
+        "first_signal_at": r.get("first_signal_at"), "decided_at": r.get("decided_at"),
+    }
+
+
+def _claim_out(c: dict) -> dict:
+    return {
+        "claim_id": c["claim_id"], "claim_text": c["claim_text"], "claim_type": c.get("claim_type"),
+        "trust_score": c.get("trust_score"),
+        "verification_status": c.get("verification_status", "unverified"),
+        "verification_evidence_url": c.get("verification_evidence_url"),
+        "contradiction_note": c.get("contradiction_note"), "source_ref": c.get("source_ref"),
+    }
 
 
 def get_founder_profile(founder_id) -> dict | None:
-    # TODO: founder + score_history + companies + signals -> FounderOut
-    raise NotImplementedError("wire in H6-H9")
+    sb = supabase_client()
+    hit = sb.table("founders").select("*").eq("founder_id", founder_id).limit(1).execute().data
+    if not hit:
+        return None
+    f = hit[0]
+    history = sb.table("founder_score_history").select("*").eq(
+        "founder_id", founder_id).order("at").execute().data
+    companies = sb.table("companies").select("company_id, name").eq(
+        "founder_id", founder_id).execute().data
+    signals = sb.table("signals").select("signal_id, source, source_url, ingested_at").eq(
+        "founder_id", founder_id).order("ingested_at", desc=True).execute().data
+    return {
+        "founder_id": f["founder_id"], "name": f["name"],
+        "founder_score": f.get("founder_score"),
+        "founder_score_interval": f.get("founder_score_interval"),
+        "is_pre_track_record": f.get("is_pre_track_record", False),
+        "score_history": [{"score": h["score"], "interval": h.get("interval"),
+                           "at": h.get("at"), "trigger_signal_id": h.get("trigger_signal_id")}
+                          for h in history],
+        "companies": [{"company_id": c["company_id"], "name": c["name"], "role": "Founder"}
+                      for c in companies],
+        "signals": [{"signal_id": s["signal_id"], "source": s["source"],
+                     "source_url": s.get("source_url"), "at": s.get("ingested_at")}
+                    for s in signals],
+    }
 
 
 def get_reasoning_log(reasoning_log_id) -> dict | None:
-    # TODO: fetch reasoning_log rows for this id -> ReasoningLogOut (steps ordered by step)
-    raise NotImplementedError("wire in H9-H11")
+    """The id passed is the opportunity_id (opportunities.reasoning_log_id == opportunity_id).
+    Returns all logged steps for that opportunity, ordered."""
+    sb = supabase_client()
+    steps = sb.table("reasoning_log").select("*").eq(
+        "opportunity_id", reasoning_log_id).order("step").execute().data
+    if not steps:
+        return None
+    return {
+        "reasoning_log_id": reasoning_log_id,
+        "opportunity_id": reasoning_log_id,
+        "steps": [{"agent": s["agent"], "step": s.get("step"), "prompt": s.get("prompt"),
+                   "response": s.get("response"), "model": s.get("model"),
+                   "created_at": s.get("created_at")} for s in steps],
+    }
 
 
-def _row_to_card(r: dict) -> dict:
+def _row_to_card(r: dict, flagged_company_ids: set | None = None) -> dict:
+    flagged_company_ids = flagged_company_ids or set()
     return {
         "opportunity_id": r["opportunity_id"],
         "company_name": (r.get("companies") or {}).get("name", ""),
@@ -92,9 +230,8 @@ def _row_to_card(r: dict) -> dict:
                        "verdict": r.get("market_axis_verdict")},
             "idea_vs_market": {"score": r.get("idea_axis_score"), "trend": r.get("idea_axis_trend")},
         },
-        # cheap board-level flag so the UI can show the contradiction dot without fetching detail.
-        # TODO: compute via a claims exists-check (any claim with verification_status='contradicted').
-        "has_contradiction": bool(r.get("has_contradiction", False)),
+        # board-level flag so the UI shows the contradiction dot without fetching detail.
+        "has_contradiction": r.get("company_id") in flagged_company_ids,
         "decision": r.get("decision_recommendation"),
         "first_signal_at": r.get("first_signal_at"), "decided_at": r.get("decided_at"),
     }
