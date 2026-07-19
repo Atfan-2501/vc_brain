@@ -35,6 +35,8 @@ def _flag(name: str, default: bool) -> bool:
 DB_WIRED   = _flag("DB_WIRED", not USE_STUBS)
 APPLY_LIVE = _flag("APPLY_LIVE", not USE_STUBS)
 QUERY_LIVE = _flag("QUERY_LIVE", not USE_STUBS)
+#   SCORING_LIVE -> /score runs the 3-axis OpenAI scorer (needs OPENAI_API_KEY + DB_WIRED).
+SCORING_LIVE = _flag("SCORING_LIVE", not USE_STUBS)
 
 # When true, 500s return the real error message + traceback tail in the JSON response
 # (instead of a generic "Internal Server Error"). Great for fast debugging; turn off for a

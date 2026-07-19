@@ -105,6 +105,28 @@ def scan(body: ScanIn | None = None):
     return ScanOut(scan_id=scan_id, channels=channels)
 
 
+@app.post("/score/{opportunity_id}")
+def score_one_endpoint(opportunity_id: str):
+    """Run the 3 independent axes for one opportunity (OpenAI). The live-demo 'score this now'
+    action — produces Founder/Market/Idea scores + Market SWOT, persisted separately."""
+    if not (config.DB_WIRED and config.SCORING_LIVE):
+        raise HTTPException(400, "DB_WIRED and SCORING_LIVE required for scoring")
+    from scoring import score_opportunity
+    return score_opportunity(opportunity_id)
+
+
+@app.post("/score", status_code=202)
+def score_batch_endpoint(background: BackgroundTasks, limit: int | None = None):
+    """Batch-score every opportunity that has no axis scores yet. Runs in the background
+    (3 OpenAI calls each); poll /opportunities to watch scores land on the board."""
+    if not (config.DB_WIRED and config.SCORING_LIVE):
+        raise HTTPException(400, "DB_WIRED and SCORING_LIVE required for scoring")
+    from scoring import score_all_unscored
+    from contracts import now_iso
+    background.add_task(score_all_unscored, limit)
+    return {"status": "scoring", "limit": limit, "generated_at": now_iso()}
+
+
 @app.post("/enrich/{founder_id}")
 def enrich_one_endpoint(founder_id: str):
     """Depth layer: enrich a single discovered founder (Tier 0 register data + Tier 1 GitHub),

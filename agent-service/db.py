@@ -240,6 +240,41 @@ def get_founder_profile(founder_id) -> dict | None:
     }
 
 
+# ---------- scoring reads ----------
+def get_opportunity_core(opportunity_id) -> dict | None:
+    hit = supabase_client().table("opportunities").select(
+        "opportunity_id, company_id, founder_id, thesis_id, stage").eq(
+        "opportunity_id", opportunity_id).limit(1).execute().data
+    return hit[0] if hit else None
+
+
+def get_active_thesis() -> dict | None:
+    hit = supabase_client().table("theses").select("*").eq(
+        "active", True).limit(1).execute().data
+    return hit[0] if hit else None
+
+
+def claims_for_company(company_id) -> list[dict]:
+    return supabase_client().table("claims").select("*").eq(
+        "company_id", company_id).execute().data
+
+
+def founder_score_for(founder_id) -> dict | None:
+    hit = supabase_client().table("founders").select(
+        "name, founder_score, founder_score_interval, is_pre_track_record").eq(
+        "founder_id", founder_id).limit(1).execute().data
+    return hit[0] if hit else None
+
+
+def opportunities_unscored(limit=None) -> list[str]:
+    """Opportunity ids that have no founder-axis score yet (i.e. not yet run through scoring)."""
+    q = supabase_client().table("opportunities").select("opportunity_id").is_(
+        "founder_axis_score", "null")
+    rows = q.execute().data
+    ids = [r["opportunity_id"] for r in rows]
+    return ids[:limit] if limit else ids
+
+
 def get_reasoning_log(reasoning_log_id) -> dict | None:
     """The id passed is the opportunity_id (opportunities.reasoning_log_id == opportunity_id).
     Returns all logged steps for that opportunity, ordered."""
