@@ -105,6 +105,18 @@ def scan(body: ScanIn | None = None):
     return ScanOut(scan_id=scan_id, channels=channels)
 
 
+@app.post("/embed", status_code=202)
+def embed_backfill(background: BackgroundTasks, limit: int | None = None):
+    """Backfill semantic embeddings for companies (needed for Ask-the-Brain relevance ranking).
+    Deliberate/background so it doesn't silently spend OpenAI. Run once after a scan."""
+    if not config.DB_WIRED:
+        raise HTTPException(400, "DB_WIRED required")
+    from embeddings import embed_all
+    from contracts import now_iso
+    background.add_task(embed_all, limit)
+    return {"status": "embedding", "limit": limit, "generated_at": now_iso()}
+
+
 @app.post("/pipeline", status_code=202)
 def pipeline_selected(body: PipelineIn, background: BackgroundTasks):
     """Run the reasoning pipeline (enrich -> score -> memo) on a user-SELECTED set of

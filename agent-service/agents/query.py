@@ -19,11 +19,11 @@ def run_query(q: str) -> dict:
                              f"Parse this compound query into filters:\n{q}",
                              extra_system=_FILTER_GUIDE)
     filters = parsed["parsed_filters"]
-    results = _execute(filters)
+    results = _execute(filters, q)
     return {"parsed_filters": filters, "results": results}
 
 
-def _execute(filters: dict) -> list[dict]:
-    """One pass over Memory: opportunities joined to companies + founders, filtered."""
+def _execute(filters: dict, query_text: str) -> list[dict]:
+    """One pass over Memory: structured filter + semantic ranking by the query embedding."""
     import db
-    return db.query_opportunities(filters)
+    return db.query_opportunities(filters, query_text=query_text)

@@ -240,21 +240,63 @@ def get_founder_profile(founder_id) -> dict | None:
     }
 
 
+# ---------- embeddings (semantic ranking for Ask the Brain) ----------
+def companies_needing_embedding(limit=None) -> list[str]:
+    rows = supabase_client().table("companies").select("company_id").is_(
+        "embedding", "null").execute().data
+    ids = [r["company_id"] for r in rows]
+    return ids[:limit] if limit else ids
+
+
+def build_company_doc(company_id) -> str:
+    """The text we embed for a company: name + sector + geography + business purpose."""
+    sb = supabase_client()
+    c = sb.table("companies").select("name, sector, geography").eq(
+        "company_id", company_id).limit(1).execute().data
+    c = c[0] if c else {}
+    purpose = ""
+    sig = sb.table("signals").select("raw_content").eq(
+        "company_id", company_id).eq("source", "handelsregister").limit(1).execute().data
+    if sig:
+        import json
+        try:
+            purpose = (json.loads(sig[0]["raw_content"]) or {}).get("business_purpose", "")
+        except Exception:
+            pass
+    parts = [c.get("name", ""), c.get("sector") or "", c.get("geography") or "", purpose]
+    return " | ".join(p for p in parts if p)
+
+
+def set_company_embedding(company_id, embedding: list[float]):
+    supabase_client().table("companies").update(
+        {"embedding": embedding}).eq("company_id", company_id).execute()
+
+
 # ---------- Ask the Brain (multi-attribute query) ----------
-def query_opportunities(filters: dict) -> list[dict]:
+def query_opportunities(filters: dict, query_text: str | None = None) -> list[dict]:
     """One-pass query over Memory. Opportunity-level filters (stage/source) hit the DB; the
-    joined company/founder conditions are applied in-process (fine at demo scale). Returns
-    [{opportunity_id, company_name, match_reason}] with a human-readable reason per hit."""
+    joined company/founder conditions are applied in-process (fine at demo scale). If query_text
+    is given and companies have embeddings, results are ranked by semantic similarity. Returns
+    [{opportunity_id, company_name, match_reason, relevance?}]."""
     sb = supabase_client()
     q = sb.table("opportunities").select(
         "opportunity_id, source, stage, "
-        "companies(name, sector, geography), "
+        "companies(name, sector, geography, embedding), "
         "founders(name, founder_score, is_pre_track_record)")
     if filters.get("stage"):
         q = q.eq("stage", filters["stage"])
     if filters.get("source"):
         q = q.eq("source", filters["source"])
     rows = q.execute().data
+
+    # embed the query once for semantic ranking (best-effort; skip if no key/embeddings)
+    qemb = None
+    if query_text:
+        try:
+            from embeddings import embed_text
+            qemb = embed_text(query_text)
+        except Exception:
+            qemb = None
 
     out = []
     for r in rows:
@@ -293,10 +335,21 @@ def query_opportunities(filters: dict) -> list[dict]:
         if filters.get("source"):
             reasons.append(filters["source"])
 
+        # semantic relevance (optional): cosine of query vs company embedding
+        relevance = None
+        if qemb and comp.get("embedding"):
+            from embeddings import cosine
+            relevance = round(cosine(qemb, comp["embedding"]), 3)
+
         out.append({"opportunity_id": r["opportunity_id"],
                     "company_name": comp.get("name", ""),
                     "founder_name": fnd.get("name"),
-                    "match_reason": ", ".join(reasons) or "matches query"})
+                    "match_reason": ", ".join(reasons) or "matches query",
+                    "relevance": relevance})
+
+    # rank by semantic relevance when available; keep structured-only order otherwise
+    if qemb:
+        out.sort(key=lambda x: (x["relevance"] is not None, x["relevance"] or 0), reverse=True)
     return out
 
 
