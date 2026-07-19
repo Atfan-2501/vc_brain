@@ -1,17 +1,45 @@
-"""Query Agent — NL compound query -> structured filters, executed in ONE pass. H9-H11.
-Multi-attribute reasoning: 'technical founder, Berlin, AI infra, enterprise traction,
-no prior VC backing' resolves as a single query, not five manual filters."""
-from schemas import QUERY_SCHEMA
+"""Ask the Brain — RAG over Memory. Retrieve by semantic similarity over comprehensive per-company
+documents, then let an LLM re-rank the retrieved candidates and synthesize an answer. This beats
+rigid attribute filtering: 'a technical founder pivoting into climate' matches on substance, and a
+missed field never zeroes out results."""
+from schemas import RERANK_SCHEMA
 from ._common import call_structured
+
+TOP_K = 15          # how many candidates to retrieve before LLM re-ranking
 
 
 def run_query(q: str) -> dict:
-    parsed = call_structured("query", QUERY_SCHEMA, f"Parse into filters + semantic terms: {q}")
-    results = _execute(parsed["parsed_filters"], parsed.get("semantic_terms", []))
-    return {"parsed_filters": parsed["parsed_filters"], "results": results}
+    import db
+    candidates = db.semantic_search(q, top_k=TOP_K)
+    if not candidates:
+        return {"parsed_filters": {}, "results": [],
+                "answer": "No companies are indexed yet — run POST /embed after enrichment."}
+
+    reranked = _rerank(q, candidates)
+    by_id = {c["opportunity_id"]: c for c in candidates}
+    results = []
+    for item in reranked.get("results", []):
+        c = by_id.get(item.get("opportunity_id"), {})
+        results.append({
+            "opportunity_id": item.get("opportunity_id"),
+            "company_name": item.get("company_name") or c.get("company_name", ""),
+            "founder_name": c.get("founder_name"),
+            "match_reason": item.get("why", ""),
+            "relevance": c.get("relevance"),
+        })
+    return {"parsed_filters": {}, "results": results, "answer": reranked.get("answer", "")}
 
 
-def _execute(filters: dict, semantic_terms: list[str]) -> list[dict]:
-    """Translate filters to a single Supabase query over opportunities/founders/companies.
-    TODO: build WHERE from filters; optionally embedding-rank by semantic_terms. One pass."""
-    raise NotImplementedError("wire in H9-H11")
+def _rerank(q: str, candidates: list[dict]) -> dict:
+    """LLM reads the retrieved candidate docs and selects/ranks the true matches + an answer."""
+    ctx = "\n\n".join(
+        f"[{c['opportunity_id']}] {c['company_name']} (relevance {c['relevance']}):\n{(c.get('doc') or '')[:700]}"
+        for c in candidates if c.get("opportunity_id"))
+    prompt = (f"User query: {q}\n\nCandidate companies retrieved by semantic similarity "
+              f"(id, name, knowledge doc):\n\n{ctx}\n\n"
+              "Select and rank ONLY the companies that genuinely match the query. For each, give a "
+              "one-line reason grounded in its doc. Then write a 1-2 sentence answer. If none fit, "
+              "return an empty results list and say so in the answer.")
+    return call_structured("query_rerank", RERANK_SCHEMA, prompt,
+                           extra_system="Only use opportunity_ids from the candidates provided. "
+                                        "Do not invent companies or claims.")

@@ -1,103 +1,81 @@
-"""Pipeline orchestrator — the vertical slice. H1-H6 gate lives here.
-apply -> extract -> verify -> screen -> 3-axis -> memo -> decision, all logged.
-Fill the DB writes as you go; keep each stage independently testable."""
+"""Inbound (Apply) pipeline: pitch deck + company name -> full memo + decision.
+deck -> extract (multimodal) -> verify (catches contradictions) -> 3 axes -> memo -> decision.
+Reuses the same scoring + memo modules as the outbound funnel, so both funnels converge."""
 import uuid
 from datetime import datetime, timezone
 
+import config
 import db
-from agents import extraction, verification, screener, axis_scorer, memo, founder_score
+from agents import extraction, verification
+from enrichment import footprint_score
 
 
-def create_opportunity(company_name: str, founder_name: str | None) -> str:
-    """Fast, synchronous: create the company + opportunity shell, stamp first_signal_at,
-    return the id so /apply can respond 202 immediately. Heavy work runs in run_pipeline."""
-    opp_id = str(uuid.uuid4())
-    now = datetime.now(timezone.utc).isoformat()
-    company_id = _create_company(company_name, founder_name)
-    _create_opportunity(opp_id, company_id, first_signal_at=now)
-    return opp_id
-
-
-def run_pipeline(opportunity_id: str, deck_bytes: bytes) -> str:
-    """Runs the full funnel in the BACKGROUND after /apply has returned. The frontend polls
-    GET /opportunities/:id until decision.recommendation is set."""
-    opp_id = opportunity_id
-    thesis = _active_thesis()
-    company_id = _company_for_opportunity(opp_id)
-
-    # 2. extract claims from the deck
-    images = extraction.pdf_to_images(deck_bytes)
-    extracted = extraction.extract_claims(deck_images=images)
-    claim_ids = [db.insert_claim(company_id, _claim_row(c)) for c in extracted["claims"]]
-    claims = _load_claims(claim_ids)
-    db.log_reasoning(opp_id, "extraction", 1, "deck->claims", extracted, "gpt-4o")
-
-    # 3. verify each claim -> trust scores + contradictions
-    for c in claims:
-        v = verification.verify_claim(c)
-        db.update_claim_verification(c["claim_id"], v["trust_score"],
-                                     v["verification_status"],
-                                     v["verification_evidence_url"], v["contradiction_note"])
-        db.log_reasoning(opp_id, "verification", 2, c["claim_text"], v, "gpt-4o")
-    claims = _load_claims(claim_ids)  # reload with trust scores
-
-    # 4. screen against thesis
-    scr = screener.screen(claims, thesis)
-    db.log_reasoning(opp_id, "screener", 3, "screen", scr, "gpt-4o")
-
-    # 5. founder score (persistent) then 3 independent axes
-    fscore = founder_score.recompute(signals=_founder_signals(company_id), deck_claims=claims)
-    axes = axis_scorer.score_all_axes(claims, thesis, fscore)
-    db.log_reasoning(opp_id, "axis_scorer", 4, "3 axes", axes, "gpt-4o")
-
-    # 6. memo + decision
-    m = memo.build_memo(claims, axes, fscore, thesis)
-    db.log_reasoning(opp_id, "memo", 5, "memo+decision", m, "gpt-4o")
-
-    # 7. persist everything, stamp decided_at
-    db.update_opportunity(opp_id, _opportunity_fields(axes, m, decided_at=_now()))
-    return opp_id
-
-
-# ---------- small helpers (TODO: implement against db.py) ----------
 def _now():
     return datetime.now(timezone.utc).isoformat()
 
-def _active_thesis() -> dict:
-    raise NotImplementedError("fetch the single active thesis via db")
 
-def _create_company(name, founder_name) -> str:
-    raise NotImplementedError
+def create_opportunity(company_name: str, founder_name: str | None) -> str:
+    """Fast, synchronous: create founder + company + inbound opportunity so /apply can return an
+    id + 202 immediately. The heavy deck processing runs in run_pipeline (background)."""
+    founder_id = None
+    if founder_name:
+        founder_id = db.upsert_founder_by_name({"name": founder_name, "is_pre_track_record": True})
+    company_id = db.insert_company({"name": company_name, "founder_id": founder_id,
+                                    "geography": None, "stage": "pre-seed"})
+    return db.create_opportunity(company_id=company_id, founder_id=founder_id,
+                                 source="inbound", stage="screening", first_signal_at=_now())
 
-def _create_opportunity(opp_id, company_id, first_signal_at):
-    raise NotImplementedError
 
-def _company_for_opportunity(opp_id) -> str:
-    raise NotImplementedError
+def run_pipeline(opportunity_id: str, deck_bytes: bytes) -> str:
+    core = db.get_opportunity_core(opportunity_id)
+    if not core:
+        return opportunity_id
+    company_id = core["company_id"]
+    founder_id = core.get("founder_id")
 
-def _claim_row(c: dict) -> dict:
-    return {"claim_text": c["claim_text"], "claim_type": c["claim_type"],
-            "source_ref": c["source_ref"]}
+    # store the deck as a signal (provenance), then extract claims from the slides (multimodal)
+    db.insert_signal({"founder_id": founder_id, "company_id": company_id, "source": "deck",
+                      "source_url": None, "raw_content": "pitch deck upload",
+                      "tags": ["inbound", "deck"], "dedup_hash": f"deck:{opportunity_id}",
+                      "extracted_at": _now()})
+    try:
+        images = extraction.pdf_to_images(deck_bytes)
+        extracted = extraction.extract_claims(deck_images=images)
+    except Exception as e:
+        db.log_reasoning(opportunity_id, "extraction", 1, "deck ingest failed",
+                         {"error": str(e)}, config.OPENAI_MODEL)
+        extracted = {"claims": [], "missing_data": []}
+    for c in extracted.get("claims", []):
+        db.insert_claim(company_id, {"claim_text": c["claim_text"],
+                                     "claim_type": c.get("claim_type"),
+                                     "source_ref": c.get("source_ref")})
+    db.log_reasoning(opportunity_id, "extraction", 1, "deck -> claims",
+                     extracted, config.OPENAI_MODEL)
 
-def _load_claims(claim_ids) -> list[dict]:
-    raise NotImplementedError
+    # verify each claim against the web -> trust scores + contradiction catch (best-effort)
+    for claim in db.claims_for_company(company_id):
+        try:
+            v = verification.verify_claim(claim)
+            db.update_claim_verification(claim["claim_id"], v["trust_score"],
+                                         v["verification_status"],
+                                         v.get("verification_evidence_url"),
+                                         v.get("contradiction_note"))
+            db.log_reasoning(opportunity_id, "verification", 2, claim["claim_text"],
+                             v, config.OPENAI_MODEL)
+        except Exception:
+            pass                                   # missing Tavily etc. -> claim stays unverified
 
-def _founder_signals(company_id) -> list[dict]:
-    raise NotImplementedError
+    # fresh applicant Founder Score: cold-start prior (narrows later via enrichment)
+    if founder_id:
+        s = footprint_score.compute({}, None)
+        db.append_founder_score(founder_id, s["score"], s["interval"])
+        db.set_pre_track_record(founder_id, s["is_pre_track_record"])
 
-def _opportunity_fields(axes, m, decided_at) -> dict:
-    """Map 3 axes + memo + decision into the opportunities columns. Never blend axes."""
-    f, mk, i = axes["founder"], axes["market"], axes["idea_vs_market"]
-    return {
-        "founder_axis_score": f["score"], "founder_axis_trend": f["trend"],
-        "founder_axis_rationale": f["rationale"], "founder_axis_claim_ids": f["cited_claim_ids"],
-        "market_axis_score": mk["score"], "market_axis_trend": mk["trend"],
-        "market_axis_verdict": mk["verdict"], "market_axis_rationale": mk["rationale"],
-        "market_axis_swot": mk["swot"], "market_axis_claim_ids": mk["cited_claim_ids"],
-        "idea_axis_score": i["score"], "idea_axis_trend": i["trend"],
-        "idea_axis_rationale": i["rationale"], "idea_axis_claim_ids": i["cited_claim_ids"],
-        "memo": m, "decision_recommendation": m["recommendation"],
-        "decision_rationale": m["decision_rationale"],
-        "most_decisive_missing_datum": m["most_decisive_missing_datum"],
-        "stage": "decision", "decided_at": decided_at,
-    }
+    # reuse the SAME reasoning as outbound: thesis screen -> 3 axes -> memo + decision.
+    # If the screener gates it out (off-thesis), skip the memo.
+    from scoring import score_opportunity
+    from memo_build import build_memo
+    res = score_opportunity(opportunity_id)
+    if not res.get("screened_out"):
+        build_memo(opportunity_id)
+    return opportunity_id

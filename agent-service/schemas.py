@@ -97,7 +97,9 @@ MEMO_SCHEMA = {
             "required": ["strengths", "weaknesses", "opportunities", "risks"]},
         "problem_and_product": {"type": "string"},
         "traction_and_kpis": {"type": "string"},
-        "optional_sections": {"type": "object"},
+        # NOTE: no free-form 'optional_sections' object here — OpenAI strict mode rejects an
+        # open object (needs additionalProperties:false + every prop required). memo_build
+        # defaults optional_sections to {} on its side.
         "gaps_flagged": {"type": "array", "items": {"type": "string"}},
         "cited_claim_ids": {"type": "array", "items": {"type": "string"}},
         "recommendation": {"type": "string",
@@ -113,11 +115,41 @@ MEMO_SCHEMA = {
 QUERY_SCHEMA = {
     "type": "object", "additionalProperties": False,
     "properties": {
-        "parsed_filters": {"type": "object"},
+        # explicit filter fields (strict mode forbids a free-form object). null = not specified.
+        "parsed_filters": {
+            "type": "object", "additionalProperties": False,
+            "properties": {
+                "sector": {"type": ["string", "null"]},
+                "geography": {"type": ["string", "null"]},
+                "stage": {"type": ["string", "null"]},
+                "source": {"type": ["string", "null"]},          # inbound | outbound
+                "min_founder_score": {"type": ["number", "null"]},
+                "is_pre_track_record": {"type": ["boolean", "null"]},
+                "keyword": {"type": ["string", "null"]},           # free text on name/sector
+            },
+            "required": ["sector", "geography", "stage", "source",
+                         "min_founder_score", "is_pre_track_record", "keyword"],
+        },
         "semantic_terms": {"type": "array", "items": {"type": "string"}},
         "rationale": {"type": "string"},
     },
     "required": ["parsed_filters", "semantic_terms", "rationale"],
+}
+
+RERANK_SCHEMA = {
+    "type": "object", "additionalProperties": False,
+    "properties": {
+        "answer": {"type": "string"},          # 1-2 sentence synthesized answer to the query
+        "results": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False,
+            "properties": {
+                "opportunity_id": {"type": "string"},
+                "company_name": {"type": "string"},
+                "why": {"type": "string"},      # one-line reason this matches the query
+            },
+            "required": ["opportunity_id", "company_name", "why"]}},
+    },
+    "required": ["answer", "results"],
 }
 
 SYSTEM_BOILERPLATE = (

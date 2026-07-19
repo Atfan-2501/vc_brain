@@ -34,10 +34,11 @@ full pipeline (extract → verify → screen → 3-axis → memo → decision) a
 `multipart/form-data`: `company_name` (string, required), `deck_file` (PDF, required),
 optional `founder_name`, `founder_links[]`.
 
-Response `202`:
+Response `202` (returns IMMEDIATELY; the pipeline runs in the background — do not block on it):
 ```json
 { "opportunity_id": "uuid", "status": "processing", "first_signal_at": "...", "generated_at": "..." }
 ```
+Client then polls `GET /opportunities/:id` until `decision.recommendation` is non-null.
 
 ---
 
@@ -61,6 +62,7 @@ Response `200`:
         "market":        { "score": 4, "trend": "stable",    "verdict": "bear" },
         "idea_vs_market":{ "score": 6, "trend": "improving", "verdict": null }
       },
+      "has_contradiction": false,
       "decision": null,
       "first_signal_at": "...",
       "decided_at": null
@@ -70,6 +72,8 @@ Response `200`:
 }
 ```
 NOTE: `axes` is always three separate objects. Never a blended number.
+`has_contradiction` is a board-level convenience flag (true if any claim on the opportunity
+is `contradicted`) so the pipeline card can show the red dot without fetching full detail.
 
 ---
 
@@ -148,6 +152,25 @@ Response `202`:
 ```
 Detected founders become `signals` → scored through the SAME funnel → appear as
 `source: "outbound"` opportunities in GET /opportunities.
+
+---
+
+## GET /reasoning-log/:id
+Agentic Traceability — the step-level chain-of-thought behind an opportunity's memo.
+The memo footer's "Reasoning log →" link resolves here via `reasoning_log_id`.
+
+Response `200`:
+```json
+{
+  "reasoning_log_id": "uuid",
+  "opportunity_id": "uuid",
+  "steps": [
+    { "agent": "verification", "step": 2, "prompt": "...", "response": {...},
+      "model": "gpt-4o", "created_at": "..." }
+  ],
+  "generated_at": "..."
+}
+```
 
 ---
 
