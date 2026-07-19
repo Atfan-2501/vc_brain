@@ -240,6 +240,66 @@ def get_founder_profile(founder_id) -> dict | None:
     }
 
 
+# ---------- Ask the Brain (multi-attribute query) ----------
+def query_opportunities(filters: dict) -> list[dict]:
+    """One-pass query over Memory. Opportunity-level filters (stage/source) hit the DB; the
+    joined company/founder conditions are applied in-process (fine at demo scale). Returns
+    [{opportunity_id, company_name, match_reason}] with a human-readable reason per hit."""
+    sb = supabase_client()
+    q = sb.table("opportunities").select(
+        "opportunity_id, source, stage, "
+        "companies(name, sector, geography), "
+        "founders(name, founder_score, is_pre_track_record)")
+    if filters.get("stage"):
+        q = q.eq("stage", filters["stage"])
+    if filters.get("source"):
+        q = q.eq("source", filters["source"])
+    rows = q.execute().data
+
+    out = []
+    for r in rows:
+        comp = r.get("companies") or {}
+        fnd = r.get("founders") or {}
+        reasons = []
+
+        def _has(field):
+            v = filters.get(field)
+            return v is not None and v != ""
+
+        if _has("sector"):
+            if filters["sector"].lower() not in (comp.get("sector") or "").lower():
+                continue
+            reasons.append(f"sector {comp.get('sector')}")
+        if _has("geography"):
+            if filters["geography"].lower() not in (comp.get("geography") or "").lower():
+                continue
+            reasons.append(f"geo {comp.get('geography')}")
+        if filters.get("min_founder_score") is not None:
+            if (fnd.get("founder_score") or 0) < filters["min_founder_score"]:
+                continue
+            reasons.append(f"founder score ≥ {filters['min_founder_score']:g}")
+        if filters.get("is_pre_track_record") is not None:
+            if bool(fnd.get("is_pre_track_record")) != filters["is_pre_track_record"]:
+                continue
+            reasons.append("pre-track-record" if filters["is_pre_track_record"] else "has track record")
+        if _has("keyword"):
+            kw = filters["keyword"].lower()
+            hay = f"{comp.get('name','')} {comp.get('sector','')}".lower()
+            if kw not in hay:
+                continue
+            reasons.append(f"matches '{filters['keyword']}'")
+        if filters.get("stage"):
+            reasons.append(f"stage {filters['stage']}")
+        if filters.get("source"):
+            reasons.append(filters["source"])
+
+        out.append({"opportunity_id": r["opportunity_id"],
+                    "company_name": comp.get("name", ""),
+                    "founder_name": fnd.get("name"),
+                    "match_reason": ", ".join(reasons) or "matches query"})
+    return out
+
+
 # ---------- scoring reads ----------
 def get_opportunity_core(opportunity_id) -> dict | None:
     hit = supabase_client().table("opportunities").select(

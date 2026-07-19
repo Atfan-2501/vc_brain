@@ -115,7 +115,21 @@ MEMO_SCHEMA = {
 QUERY_SCHEMA = {
     "type": "object", "additionalProperties": False,
     "properties": {
-        "parsed_filters": {"type": "object"},
+        # explicit filter fields (strict mode forbids a free-form object). null = not specified.
+        "parsed_filters": {
+            "type": "object", "additionalProperties": False,
+            "properties": {
+                "sector": {"type": ["string", "null"]},
+                "geography": {"type": ["string", "null"]},
+                "stage": {"type": ["string", "null"]},
+                "source": {"type": ["string", "null"]},          # inbound | outbound
+                "min_founder_score": {"type": ["number", "null"]},
+                "is_pre_track_record": {"type": ["boolean", "null"]},
+                "keyword": {"type": ["string", "null"]},           # free text on name/sector
+            },
+            "required": ["sector", "geography", "stage", "source",
+                         "min_founder_score", "is_pre_track_record", "keyword"],
+        },
         "semantic_terms": {"type": "array", "items": {"type": "string"}},
         "rationale": {"type": "string"},
     },
