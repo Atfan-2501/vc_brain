@@ -141,14 +141,22 @@ _OR_BASE = "https://api.openregister.de"
 
 
 def _or_request(method: str, path: str, key: str, body: dict | None = None) -> dict:
-    import urllib.request
+    import urllib.request, urllib.error
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(f"{_OR_BASE}{path}", data=data, method=method,
                                  headers={"Authorization": f"Bearer {key}",
-                                          "Content-Type": "application/json"})
+                                          "Content-Type": "application/json",
+                                          "Accept": "application/json",
+                                          # Cloudflare blocks the default Python-urllib UA (err 1010)
+                                          "User-Agent": "vc-brain/1.0 (+https://openregister.de)"})
     _rate_limit_guard()
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read())
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        # surface OpenRegister's actual JSON error message, not a bare status code
+        detail = e.read().decode(errors="replace")
+        raise RuntimeError(f"OpenRegister {method} {path} -> HTTP {e.code}: {detail}") from None
 
 
 def _openregister_records(keywords: str) -> list[HandelsregisterRecord]:
@@ -156,17 +164,26 @@ def _openregister_records(keywords: str) -> list[HandelsregisterRecord]:
     Flow: 1 search (10 credits) -> client-side keep GmbHs -> up to OPENREGISTER_MAX_DETAILS
     detail calls (10 credits each) for directors + purpose + incorporation date.
     Verified against the OpenRegister OpenAPI schema (CompanyV1)."""
+    import sys
     key = config.OPENREGISTER_API_KEY
     if not key:
         raise RuntimeError("openregister backend needs OPENREGISTER_API_KEY.")
 
-    # 1) search Munich companies. location.city is a documented filter; we keep GmbHs client-side
-    #    from the lean search results (which include legal_form) BEFORE spending detail credits.
+    # 1) search Munich GmbHs. City goes in the `filters` array (NOT `location`, which is lat/lon).
+    filters = [
+        {"field": "city", "value": "München"},
+        {"field": "legal_form", "value": "gmbh"},
+        {"field": "active", "value": "true"},
+    ]
+    if config.OPENREGISTER_MIN_INCORPORATED:                 # optional: newly-founded only
+        filters.append({"field": "incorporated_at", "min": config.OPENREGISTER_MIN_INCORPORATED})
     search = _or_request("POST", "/v1/search/company", key,
-                         {"location": {"city": "München"},
-                          "pagination": {"page": 1, "per_page": 50}})
-    stubs = [s for s in search.get("results", [])
-             if s.get("legal_form") == "gmbh" and s.get("active", True)]
+                         {"filters": filters, "pagination": {"page": 1, "per_page": 50}})
+    results = search.get("results", [])
+    if config.OPENREGISTER_DEBUG:
+        print(f"[openregister] raw search results: {len(results)}; "
+              f"total={search.get('pagination', {}).get('total_results')}", file=sys.stderr)
+    stubs = [s for s in results if s.get("legal_form") == "gmbh" and s.get("active", True)]
 
     out: list[HandelsregisterRecord] = []
     for stub in stubs[:config.OPENREGISTER_MAX_DETAILS]:

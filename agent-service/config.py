@@ -1,8 +1,14 @@
 """Central config + client init. Import from here, never re-read env elsewhere."""
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+# python-dotenv is only a convenience for loading a local .env file. It's optional:
+# on Render (and for the stdlib-only harvest script) env vars are already set, so a missing
+# dotenv must not crash the import.
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ModuleNotFoundError:
+    pass
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
@@ -41,6 +47,10 @@ OPENREGISTER_API_KEY = os.getenv("OPENREGISTER_API_KEY", "")
 # how many company-detail calls the openregister backend may make per scan (each = 10 credits;
 # free tier = 50/month). Keeps a live scan from burning the whole monthly budget.
 OPENREGISTER_MAX_DETAILS = int(os.getenv("OPENREGISTER_MAX_DETAILS", "4"))
+# optional recency filter (DD-MM-YYYY). Only return companies incorporated on/after this date,
+# to bias toward newly-founded startups. Empty = no recency filter (safest for non-empty results).
+OPENREGISTER_MIN_INCORPORATED = os.getenv("OPENREGISTER_MIN_INCORPORATED", "")
+OPENREGISTER_DEBUG = _flag("OPENREGISTER_DEBUG", False)
 
 # Per-agent override: flip one agent live while others stay stubbed during H1-H6.
 # e.g. STUB_AGENTS = {"extraction": False} makes only extraction call OpenAI for real.
