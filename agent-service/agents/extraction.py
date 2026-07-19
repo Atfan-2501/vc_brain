@@ -17,6 +17,18 @@ def extract_claims(deck_images: list[str] | None = None, page_text: str = "") ->
     )
 
 
+def extract_claims_from_text(text: str) -> dict:
+    """Extract claims from web content (Tier-2 enrichment). The text is a concatenation of
+    Tavily results with their URLs inline; the model sets source_ref.type='web' and the URL
+    the claim came from. Returns {claims:[...], missing_data:[...]}."""
+    prompt = ("Extract atomic, factual claims about the founder, company, traction, or market "
+              "from the web content below. For EACH claim, set source_ref.type='web' and "
+              "source_ref.url to the exact URL (shown as 'SOURCE: <url>') it came from. Ignore "
+              "marketing fluff; keep only checkable assertions.\n\n" + text)
+    return call_structured("extraction", EXTRACTION_SCHEMA, prompt,
+                           extra_system="Only assert what the text supports. Do not infer numbers.")
+
+
 # --- helper: render a PDF to base64 data-URLs for the multimodal call ---
 def pdf_to_images(deck_bytes: bytes) -> list[str]:
     """TODO: render pages with pypdf/pdf2image -> base64 'data:image/png;base64,...' URLs.

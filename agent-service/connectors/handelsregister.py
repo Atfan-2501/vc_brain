@@ -46,6 +46,16 @@ _SECTOR_KEYWORDS = {
 }
 
 
+def infer_sector(business_purpose: str | None) -> str | None:
+    """Map a German business purpose to a thesis sector via keywords. Reused by the record
+    property and by Tier-2 enrichment (market search topic)."""
+    text = (business_purpose or "").lower()
+    for sector, kws in _SECTOR_KEYWORDS.items():
+        if any(k in text for k in kws):
+            return sector
+    return None
+
+
 @dataclass
 class HandelsregisterRecord:
     company_name: str
@@ -82,11 +92,7 @@ class HandelsregisterRecord:
 
     @property
     def inferred_sector(self) -> str | None:
-        text = self.business_purpose.lower()
-        for sector, kws in _SECTOR_KEYWORDS.items():
-            if any(k in text for k in kws):
-                return sector
-        return None
+        return infer_sector(self.business_purpose)
 
     @property
     def days_since_registration(self) -> int | None:

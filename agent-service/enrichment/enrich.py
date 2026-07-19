@@ -10,9 +10,15 @@ Runs OFFLINE/BATCH (like the harvest), never live on stage. Bounded + cached per
 from __future__ import annotations
 import json
 
+import config
 from enrichment import github as gh
 from enrichment import openregister_extract as t0
 from enrichment import footprint_score as fs
+
+
+def _infer_sector(rec: dict) -> str | None:
+    from connectors.handelsregister import infer_sector
+    return infer_sector(rec.get("business_purpose"))
 
 
 def enrich_founder(founder: dict, company_signal_raw: str, company_id: str,
@@ -35,6 +41,16 @@ def enrich_founder(founder: dict, company_signal_raw: str, company_id: str,
         result["github"] = fp.__dict__
         all_claims += _github_claims(fp)
 
+    # --- Tier 2: Tavily web footprint / traction / market (gated; costs Tavily + OpenAI) ---
+    web_signals = []
+    if config.WEB_ENRICH:
+        from enrichment import web
+        w = web.enrich_web(founder_id, company_id, founder["name"], rec.get("company_name", ""),
+                           rec.get("business_purpose", ""), _infer_sector(rec))
+        all_claims += w["claims"]
+        web_signals = w["signals"]
+        result["web"] = {"results": w["result_count"], "claims": len(w["claims"])}
+
     result["claims"] = all_claims
 
     # --- Founder Score from the assembled footprint (cold-start, with honest interval) ---
@@ -47,6 +63,8 @@ def enrich_founder(founder: dict, company_signal_raw: str, company_id: str,
             db.insert_claim(company_id, c)
         if fp:
             db.insert_signal(gh.to_signal_row(founder_id, fp))
+        for s in web_signals:
+            db.insert_signal(s)                         # dedups on url hash
         db.append_founder_score(founder_id, score["score"], score["interval"])
         db.set_pre_track_record(founder_id, score["is_pre_track_record"])
     return result
