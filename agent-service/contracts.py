@@ -140,6 +140,11 @@ class ScanIn(BaseModel):
     channels: list[str] = ["handelsregister"]   # the built connector; add show_hn/producthunt later
 
 
+class PipelineIn(BaseModel):
+    opportunity_ids: list[str]
+    steps: list[str] = ["enrich", "score", "memo"]   # which stages to run on the selected set
+
+
 class ScanOut(BaseModel):
     scan_id: str
     channels: list[str]

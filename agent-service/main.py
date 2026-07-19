@@ -12,7 +12,7 @@ import config
 import stub_data
 from contracts import (
     ThesisIn, ThesisOut, ApplyOut, OpportunitiesOut, OpportunityDetail,
-    QueryIn, QueryOut, ScanIn, ScanOut, FounderOut, ReasoningLogOut,
+    QueryIn, QueryOut, ScanIn, ScanOut, FounderOut, ReasoningLogOut, PipelineIn,
 )
 
 app = FastAPI(title="VC Brain Agent Service", version="0.1.0")
@@ -103,6 +103,21 @@ def scan(body: ScanIn | None = None):
     from sourcing import run_scan
     scan_id = run_scan(channels)
     return ScanOut(scan_id=scan_id, channels=channels)
+
+
+@app.post("/pipeline", status_code=202)
+def pipeline_selected(body: PipelineIn, background: BackgroundTasks):
+    """Run the reasoning pipeline (enrich -> score -> memo) on a user-SELECTED set of
+    opportunities from the board. Runs in the background; poll /opportunities to watch the
+    selected cards move Sourcing -> Screening -> Decision with scores. Each stage is gated by
+    its own flag, so unselected/unavailable steps are simply skipped."""
+    if not config.DB_WIRED:
+        raise HTTPException(400, "DB_WIRED required")
+    from orchestrate import run_selected
+    from contracts import now_iso
+    background.add_task(run_selected, body.opportunity_ids, body.steps)
+    return {"status": "processing", "count": len(body.opportunity_ids),
+            "steps": body.steps, "generated_at": now_iso()}
 
 
 @app.post("/memo/{opportunity_id}")
