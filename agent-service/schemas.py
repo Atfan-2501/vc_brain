@@ -136,6 +136,22 @@ QUERY_SCHEMA = {
     "required": ["parsed_filters", "semantic_terms", "rationale"],
 }
 
+RERANK_SCHEMA = {
+    "type": "object", "additionalProperties": False,
+    "properties": {
+        "answer": {"type": "string"},          # 1-2 sentence synthesized answer to the query
+        "results": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False,
+            "properties": {
+                "opportunity_id": {"type": "string"},
+                "company_name": {"type": "string"},
+                "why": {"type": "string"},      # one-line reason this matches the query
+            },
+            "required": ["opportunity_id", "company_name", "why"]}},
+    },
+    "required": ["answer", "results"],
+}
+
 SYSTEM_BOILERPLATE = (
     "You are a VC analyst agent. Only assert what the evidence supports. If evidence is "
     "absent, list it in missing_data - never infer or fabricate numbers. Cite the claim "

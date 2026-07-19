@@ -132,6 +132,7 @@ class QueryIn(BaseModel):
 class QueryOut(BaseModel):
     parsed_filters: dict = {}
     results: list[dict] = []
+    answer: str = ""                 # RAG: synthesized natural-language answer to the query
     generated_at: str = Field(default_factory=now_iso)
 
 

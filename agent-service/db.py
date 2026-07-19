@@ -252,9 +252,11 @@ def companies_needing_embedding(limit=None, force=False) -> list[str]:
 
 
 def build_company_doc(company_id) -> str:
-    """The text we embed for a company: name + sector + geography + business purpose + the FOUNDER
-    (name) and the enrichment claims about them (GitHub footprint, team background, traction).
-    This is what makes 'technical founder with strong GitHub' style queries rank well."""
+    """COMPREHENSIVE knowledge document for a company — everything Memory knows about it, so
+    RAG retrieval matches on substance: company + business purpose + founder (name, score,
+    pre-track-record) + ALL claims (financials, GitHub footprint, web traction, team) + the
+    axis rationales once scored. This rich doc is what makes semantic search actually effective."""
+    import json
     sb = supabase_client()
     c = sb.table("companies").select("name, sector, geography, founder_id").eq(
         "company_id", company_id).limit(1).execute().data
@@ -264,34 +266,82 @@ def build_company_doc(company_id) -> str:
     sig = sb.table("signals").select("raw_content").eq(
         "company_id", company_id).eq("source", "handelsregister").limit(1).execute().data
     if sig:
-        import json
         try:
             purpose = (json.loads(sig[0]["raw_content"]) or {}).get("business_purpose", "")
         except Exception:
             pass
 
-    founder_name = ""
+    founder_line = ""
     if c.get("founder_id"):
-        f = sb.table("founders").select("name").eq(
+        f = sb.table("founders").select(
+            "name, founder_score, is_pre_track_record").eq(
             "founder_id", c["founder_id"]).limit(1).execute().data
-        founder_name = f[0]["name"] if f else ""
+        if f:
+            f = f[0]
+            bits = [f.get("name", "")]
+            if f.get("founder_score") is not None:
+                bits.append(f"founder score {f['founder_score']:g}")
+            if f.get("is_pre_track_record"):
+                bits.append("pre-track-record")
+            founder_line = "Founder: " + ", ".join(b for b in bits if b)
 
-    # enrichment claims (GitHub footprint, team background, traction, tech) carry founder signal
-    claims = sb.table("claims").select("claim_text, claim_type").eq(
+    # ALL claims (not a subset) — they carry the real signal
+    claims = sb.table("claims").select("claim_text").eq(
         "company_id", company_id).execute().data
-    claim_texts = [cl["claim_text"] for cl in claims
-                   if cl.get("claim_type") in ("team", "tech", "traction", "market")][:10]
+    claim_texts = [cl["claim_text"] for cl in claims if cl.get("claim_text")][:20]
+
+    # axis rationales, if the opportunity has been scored
+    axis_texts = []
+    opp = sb.table("opportunities").select(
+        "founder_axis_rationale, market_axis_rationale, idea_axis_rationale").eq(
+        "company_id", company_id).limit(1).execute().data
+    if opp:
+        for k in ("founder_axis_rationale", "market_axis_rationale", "idea_axis_rationale"):
+            if opp[0].get(k):
+                axis_texts.append(opp[0][k])
 
     parts = [c.get("name", ""), c.get("sector") or "", c.get("geography") or "", purpose]
-    if founder_name:
-        parts.append(f"Founder: {founder_name}")
+    if founder_line:
+        parts.append(founder_line)
     parts.extend(claim_texts)
+    parts.extend(axis_texts)
     return " | ".join(p for p in parts if p)
 
 
-def set_company_embedding(company_id, embedding: list[float]):
+def set_company_embedding(company_id, embedding: list[float], doc: str = ""):
     supabase_client().table("companies").update(
-        {"embedding": embedding}).eq("company_id", company_id).execute()
+        {"embedding": embedding, "embedding_doc": doc}).eq("company_id", company_id).execute()
+
+
+def semantic_search(query_text: str, top_k: int = 15) -> list[dict]:
+    """Pure RAG retrieval: embed the query, cosine-rank ALL embedded companies, return the top-K
+    with their doc (for LLM re-ranking). No hard structured pre-filter that could zero results."""
+    from embeddings import embed_text, cosine
+    sb = supabase_client()
+    rows = sb.table("companies").select(
+        "company_id, name, embedding, embedding_doc").not_.is_(
+        "embedding", "null").execute().data
+    if not rows:
+        return []
+    qemb = embed_text(query_text)
+    scored = []
+    for r in rows:
+        emb = r.get("embedding")
+        if emb:
+            scored.append((cosine(qemb, emb), r))
+    scored.sort(key=lambda x: x[0], reverse=True)
+
+    out = []
+    for score, r in scored[:top_k]:
+        opp = sb.table("opportunities").select(
+            "opportunity_id, founders(name)").eq(
+            "company_id", r["company_id"]).limit(1).execute().data
+        opp = opp[0] if opp else {}
+        out.append({"opportunity_id": opp.get("opportunity_id"),
+                    "company_id": r["company_id"], "company_name": r.get("name", ""),
+                    "founder_name": (opp.get("founders") or {}).get("name"),
+                    "relevance": round(score, 3), "doc": r.get("embedding_doc", "")})
+    return out
 
 
 # ---------- Ask the Brain (multi-attribute query) ----------

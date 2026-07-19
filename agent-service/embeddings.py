@@ -37,7 +37,7 @@ def embed_all(limit: int | None = None, force: bool = False) -> dict:
         if not doc.strip():
             continue
         try:
-            db.set_company_embedding(cid, embed_text(doc))
+            db.set_company_embedding(cid, embed_text(doc), doc)   # store the doc for RAG re-rank
             done += 1
         except Exception:
             continue
