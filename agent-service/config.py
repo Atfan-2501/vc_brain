@@ -104,4 +104,29 @@ def supabase_client():
     if _supabase is None:
         from supabase import create_client
         _supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+        _force_http1(_supabase)
     return _supabase
+
+
+def reset_supabase():
+    """Drop the cached client so the next call builds a fresh connection pool.
+    Used to recover from a stale/dead connection after the instance idles."""
+    global _supabase
+    _supabase = None
+
+
+def _force_http1(sb):
+    """Swap PostgREST's httpx session for an HTTP/1.1 one. Supabase over HTTP/2 (esp. via IPv6)
+    intermittently drops connections -> httpx RemoteProtocolError 'Server disconnected'. HTTP/1.1
+    avoids it. Best-effort across supabase-py versions."""
+    try:
+        import httpx
+        pg = getattr(sb, "postgrest", None)
+        sess = getattr(pg, "session", None)
+        if sess is None:
+            return
+        new = httpx.Client(base_url=str(sess.base_url), headers=dict(sess.headers),
+                           http2=False, follow_redirects=True, timeout=httpx.Timeout(30.0))
+        pg.session = new
+    except Exception:
+        pass
