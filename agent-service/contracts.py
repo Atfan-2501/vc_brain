@@ -122,6 +122,7 @@ class OpportunityDetail(BaseModel):
     thesis_fit: Optional[str] = None          # strong | partial | off_thesis
     passed_screen: Optional[bool] = None
     screen_rationale: Optional[str] = None
+    embedded: bool = False                    # indexed for Ask the Brain (last pipeline step)
     reasoning_log_id: Optional[str] = None
     first_signal_at: Optional[str] = None
     decided_at: Optional[str] = None

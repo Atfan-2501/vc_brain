@@ -184,7 +184,8 @@ def get_opportunities(stage=None, thesis_id=None) -> dict:
 def get_opportunity_detail(opportunity_id) -> dict | None:
     sb = supabase_client()
     rows = sb.table("opportunities").select(
-        "*, companies(name), founders(name, founder_score, founder_score_interval, is_pre_track_record)"
+        "*, companies(name, embedding_doc), "
+        "founders(name, founder_score, founder_score_interval, is_pre_track_record)"
     ).eq("opportunity_id", opportunity_id).limit(1).execute().data
     if not rows:
         return None
@@ -231,6 +232,8 @@ def get_opportunity_detail(opportunity_id) -> dict | None:
         "thesis_fit": r.get("thesis_fit"),
         "passed_screen": r.get("passed_screen"),
         "screen_rationale": r.get("screen_rationale"),
+        # true once the company has been embedded (indexed for Ask the Brain)
+        "embedded": bool(company.get("embedding_doc")),
         "first_signal_at": r.get("first_signal_at"), "decided_at": r.get("decided_at"),
     }
 
