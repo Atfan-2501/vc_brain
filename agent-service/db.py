@@ -5,21 +5,41 @@ from config import supabase_client
 from contracts import ThesisOut
 
 
+def _owner():
+    """Current request's user id (from auth context). None in single-tenant/dev mode."""
+    from auth import current_user_id
+    return current_user_id()
+
+
+def _own(q):
+    """Filter a query builder to the current owner (no-op when owner is None)."""
+    o = _owner()
+    return q.eq("owner_id", o) if o else q
+
+
+def _stamp(row: dict) -> dict:
+    """Add owner_id to a row being inserted (only when we have an owner)."""
+    o = _owner()
+    if o:
+        row = {**row, "owner_id": o}
+    return row
+
+
 # ---------- writes ----------
 def upsert_thesis(body) -> ThesisOut:
     sb = supabase_client()
-    sb.table("theses").update({"active": False}).eq("active", True).execute()  # single active thesis
-    row = sb.table("theses").insert({
+    _own(sb.table("theses").update({"active": False}).eq("active", True)).execute()
+    row = sb.table("theses").insert(_stamp({
         "sectors": body.sectors, "stages": body.stages, "geographies": body.geographies,
         "check_size_usd": body.check_size_usd, "ownership_target_pct": body.ownership_target_pct,
         "risk_appetite": body.risk_appetite, "active": True,
-    }).execute().data[0]
+    })).execute().data[0]
     return ThesisOut(thesis_id=row["thesis_id"])
 
 
 def insert_claim(company_id, claim: dict) -> str:
     sb = supabase_client()
-    row = sb.table("claims").insert({"company_id": company_id, **claim}).execute().data[0]
+    row = sb.table("claims").insert(_stamp({"company_id": company_id, **claim})).execute().data[0]
     return row["claim_id"]
 
 
@@ -39,27 +59,27 @@ def insert_signal(signal: dict) -> str | None:
     """Insert a signal; return signal_id, or None if the dedup_hash already exists.
     Dedup is how the same founder discovered via multiple sources doesn't double-count."""
     sb = supabase_client()
-    existing = sb.table("signals").select("signal_id").eq(
-        "dedup_hash", signal["dedup_hash"]).limit(1).execute().data
+    existing = _own(sb.table("signals").select("signal_id").eq(
+        "dedup_hash", signal["dedup_hash"])).limit(1).execute().data
     if existing:
         return None
-    return sb.table("signals").insert(signal).execute().data[0]["signal_id"]
+    return sb.table("signals").insert(_stamp(signal)).execute().data[0]["signal_id"]
 
 
 def insert_company(company: dict) -> str:
-    return supabase_client().table("companies").insert(company).execute().data[0]["company_id"]
+    return supabase_client().table("companies").insert(
+        _stamp(company)).execute().data[0]["company_id"]
 
 
 def upsert_founder_by_name(founder: dict) -> str:
-    """Identity resolution (name-based for now). If a founder with this name exists, reuse it
-    so the Founder Score follows the person across sources/companies; else create.
-    TODO H6-H9: strengthen with github_handle/linkedin_slug/domain matching, not just name."""
+    """Identity resolution (name-based), scoped to the owner so users don't share founder records.
+    If a founder with this name exists for this owner, reuse it; else create."""
     sb = supabase_client()
-    hit = sb.table("founders").select("founder_id").eq(
-        "name", founder["name"]).limit(1).execute().data
+    hit = _own(sb.table("founders").select("founder_id").eq(
+        "name", founder["name"])).limit(1).execute().data
     if hit:
         return hit[0]["founder_id"]
-    return sb.table("founders").insert(founder).execute().data[0]["founder_id"]
+    return sb.table("founders").insert(_stamp(founder)).execute().data[0]["founder_id"]
 
 
 def link_signal(signal_id, founder_id, company_id):
@@ -70,28 +90,28 @@ def link_signal(signal_id, founder_id, company_id):
 
 def create_opportunity(company_id, founder_id, source, stage, first_signal_at) -> str:
     """General opportunity creator (inbound or outbound)."""
-    row = supabase_client().table("opportunities").insert({
+    row = supabase_client().table("opportunities").insert(_stamp({
         "company_id": company_id, "founder_id": founder_id, "source": source,
         "stage": stage, "first_signal_at": first_signal_at,
-    }).execute().data[0]
+    })).execute().data[0]
     return row["opportunity_id"]
 
 
 def create_outbound_opportunity(company_id, founder_id, first_signal_at) -> str:
     """Create an outbound opportunity at stage 'sourcing' so it lands on the board and can be
     scored by the same funnel as inbound. Axes stay null until the scorer runs."""
-    row = supabase_client().table("opportunities").insert({
+    row = supabase_client().table("opportunities").insert(_stamp({
         "company_id": company_id, "founder_id": founder_id, "source": "outbound",
         "stage": "sourcing", "first_signal_at": first_signal_at,
-    }).execute().data[0]
+    })).execute().data[0]
     return row["opportunity_id"]
 
 
 def log_reasoning(opportunity_id, agent, step, prompt, response, model):
-    supabase_client().table("reasoning_log").insert({
+    supabase_client().table("reasoning_log").insert(_stamp({
         "opportunity_id": opportunity_id, "agent": agent, "step": step,
         "prompt": prompt, "response": response, "model": model,
-    }).execute()
+    })).execute()
 
 
 def set_pre_track_record(founder_id, value: bool):
@@ -118,10 +138,10 @@ def founders_to_enrich(limit=None) -> list[dict]:
     """Outbound founders discovered via handelsregister that have NOT been enriched yet
     (no github signal). Returns {founder_id, name, company_id, company_signal_raw}."""
     sb = supabase_client()
-    hr = sb.table("signals").select(
+    hr = _own(sb.table("signals").select(
         "founder_id, company_id, raw_content, founders(name)").eq(
-        "source", "handelsregister").execute().data
-    gh = sb.table("signals").select("founder_id").eq("source", "github").execute().data
+        "source", "handelsregister")).execute().data
+    gh = _own(sb.table("signals").select("founder_id").eq("source", "github")).execute().data
     enriched = {g["founder_id"] for g in gh if g.get("founder_id")}
     out, seen = [], set()
     for s in hr:
@@ -150,6 +170,7 @@ def append_founder_score(founder_id, score, interval, trigger_signal_id=None):
 def get_opportunities(stage=None, thesis_id=None) -> dict:
     sb = supabase_client()
     q = sb.table("opportunities").select("*, companies(name), founders(name, is_pre_track_record)")
+    q = _own(q)
     if stage:
         q = q.eq("stage", stage)
     rows = q.execute().data
@@ -256,7 +277,7 @@ def get_founder_profile(founder_id) -> dict | None:
 def companies_needing_embedding(limit=None, force=False) -> list[str]:
     """Company ids to embed. force=True re-embeds ALL (use after enrichment adds founder claims);
     otherwise only companies without an embedding yet."""
-    q = supabase_client().table("companies").select("company_id")
+    q = _own(supabase_client().table("companies").select("company_id"))
     if not force:
         q = q.is_("embedding", "null")
     ids = [r["company_id"] for r in q.execute().data]
@@ -330,9 +351,9 @@ def semantic_search(query_text: str, top_k: int = 15) -> list[dict]:
     with their doc (for LLM re-ranking). No hard structured pre-filter that could zero results."""
     from embeddings import embed_text, cosine
     sb = supabase_client()
-    rows = sb.table("companies").select(
+    rows = _own(sb.table("companies").select(
         "company_id, name, embedding, embedding_doc").not_.is_(
-        "embedding", "null").execute().data
+        "embedding", "null")).execute().data
     if not rows:
         return []
     qemb = embed_text(query_text)
@@ -363,10 +384,10 @@ def query_opportunities(filters: dict, query_text: str | None = None) -> list[di
     is given and companies have embeddings, results are ranked by semantic similarity. Returns
     [{opportunity_id, company_name, match_reason, relevance?}]."""
     sb = supabase_client()
-    q = sb.table("opportunities").select(
+    q = _own(sb.table("opportunities").select(
         "opportunity_id, source, stage, "
         "companies(name, sector, geography, embedding), "
-        "founders(name, founder_score, is_pre_track_record)")
+        "founders(name, founder_score, is_pre_track_record)"))
     if filters.get("stage"):
         q = q.eq("stage", filters["stage"])
     if filters.get("source"):
@@ -446,8 +467,8 @@ def get_opportunity_core(opportunity_id) -> dict | None:
 
 
 def get_active_thesis() -> dict | None:
-    hit = supabase_client().table("theses").select("*").eq(
-        "active", True).limit(1).execute().data
+    hit = _own(supabase_client().table("theses").select("*").eq(
+        "active", True)).limit(1).execute().data
     return hit[0] if hit else None
 
 
@@ -483,8 +504,8 @@ def get_opportunity_axes(opportunity_id) -> dict:
 
 def opportunities_needing_memo(limit=None) -> list[str]:
     """Opportunities that are scored (have a founder-axis score) but have no decision yet."""
-    rows = supabase_client().table("opportunities").select(
-        "opportunity_id, founder_axis_score, decision_recommendation").execute().data
+    rows = _own(supabase_client().table("opportunities").select(
+        "opportunity_id, founder_axis_score, decision_recommendation")).execute().data
     ids = [r["opportunity_id"] for r in rows
            if r.get("founder_axis_score") is not None and not r.get("decision_recommendation")]
     return ids[:limit] if limit else ids
@@ -492,8 +513,8 @@ def opportunities_needing_memo(limit=None) -> list[str]:
 
 def opportunities_unscored(limit=None) -> list[str]:
     """Opportunity ids that have no founder-axis score yet (i.e. not yet run through scoring)."""
-    q = supabase_client().table("opportunities").select("opportunity_id").is_(
-        "founder_axis_score", "null")
+    q = _own(supabase_client().table("opportunities").select("opportunity_id").is_(
+        "founder_axis_score", "null"))
     rows = q.execute().data
     ids = [r["opportunity_id"] for r in rows]
     return ids[:limit] if limit else ids
