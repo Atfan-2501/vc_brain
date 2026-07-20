@@ -26,6 +26,17 @@ def cosine(a: list[float], b: list[float]) -> float:
     return dot / (na * nb) if na and nb else 0.0
 
 
+def embed_company(company_id) -> bool:
+    """Embed a single company's comprehensive doc (build + store). Called at the end of the
+    pipeline so Ask the Brain works without a separate manual /embed step."""
+    import db
+    doc = db.build_company_doc(company_id)
+    if not doc.strip():
+        return False
+    db.set_company_embedding(company_id, embed_text(doc), doc)
+    return True
+
+
 def embed_all(limit: int | None = None, force: bool = False) -> dict:
     """Backfill embeddings. force=True re-embeds every company (run after enrichment so founder
     claims are included); otherwise only companies without an embedding."""

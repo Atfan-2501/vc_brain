@@ -78,4 +78,10 @@ def run_pipeline(opportunity_id: str, deck_bytes: bytes) -> str:
     res = score_opportunity(opportunity_id)
     if not res.get("screened_out"):
         build_memo(opportunity_id)
+    # auto-embed so the applicant is searchable in Ask the Brain
+    try:
+        from embeddings import embed_company
+        embed_company(company_id)
+    except Exception:
+        pass
     return opportunity_id

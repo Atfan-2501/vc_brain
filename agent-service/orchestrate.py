@@ -47,6 +47,13 @@ def run_selected(opportunity_ids: list[str], steps: list[str]) -> dict:
                 _log(f"{oid} · memo…")
                 build_memo(oid)
                 r["memo"] = True
+            # auto-embed so Ask the Brain works without a separate manual /embed step
+            try:
+                from embeddings import embed_company
+                if embed_company(core["company_id"]):
+                    r["embedded"] = True
+            except Exception as e:
+                _log(f"{oid} · embed skipped: {e}")
             _log(f"{oid} · done {r}")
         except Exception as e:
             _log(f"{oid} · ERROR: {type(e).__name__}: {e}")
